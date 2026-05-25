@@ -12,11 +12,14 @@ tests/
 
 ## Getting started
 
-Clone and enter the project:
+Clone only this template from `main` on the [templates](https://github.com/evanwiseman/templates) monorepo:
 
 ```bash
-git clone https://github.com/evanwiseman/templates/strict-python.git project-name
-cd strict-python
+git clone --depth 1 --filter=blob:none --sparse https://github.com/evanwiseman/templates.git project-name
+cd project-name
+git sparse-checkout set strict-python
+mv strict-python/* strict-python/.??* .
+rmdir strict-python
 ```
 
 Rename the package and project metadata (`strict_python/`, `pyproject.toml` `name`, imports in `tests/`). Then:
@@ -28,6 +31,7 @@ make check
 ```
 
 Copy `.env.example` to `.env` when you add settings that read from the environment.
+
 ```bash
 cp .env.example .env
 ```
