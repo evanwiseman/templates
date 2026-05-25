@@ -1,0 +1,65 @@
+# Runs strict-python CI when this repo root is the templates monorepo.
+# Adopters using strict-python as the repo root use strict-python/.github/workflows/ci.yml.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "strict-python/**"
+      - ".github/workflows/**"
+  pull_request:
+    paths:
+      - "strict-python/**"
+      - ".github/workflows/**"
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: strict-python
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: strict-python/uv.lock
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      - name: Quality gate
+        run: make ci
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: strict-python/uv.lock
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      - name: Build wheels and sdists
+        run: make build
