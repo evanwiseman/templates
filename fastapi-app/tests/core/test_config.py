@@ -103,7 +103,6 @@ class TestDatabaseSettings:
         assert str(DatabaseSettings().url).endswith("/custom_db")
 
 
-
 class TestSettings:
     def test_default_log_level(self) -> None:
         """Default log level is INFO."""
