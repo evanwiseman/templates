@@ -76,6 +76,7 @@ dependencies = [
     { name = "alembic" },
     { name = "fastapi" },
     { name = "pydantic" },
+    { name = "pydantic-settings" },
 ]
 
 [package.optional-dependencies]
@@ -95,6 +96,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.136.3" },
     { name = "prek", marker = "extra == 'dev'", specifier = ">=0.3.10" },
     { name = "pydantic", specifier = ">=2.13.3" },
+    { name = "pydantic-settings", specifier = ">=2.14.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.1.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12" },
