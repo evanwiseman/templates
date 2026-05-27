@@ -10,8 +10,8 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "app",
     "example-lib",
-    "fastapi-app",
 ]
 
 [[package]]
@@ -67,6 +67,38 @@ sdist = { url = "https://files.pythonhosted.org/packages/19/14/2c5dd9f512b66549a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/da/42/e921fccf5015463e32a3cf6ee7f980a6ed0f395ceeaa45060b61d86486c2/anyio-4.13.0-py3-none-any.whl", hash = "sha256:08b310f9e24a9594186fd75b4f73f4a4152069e3853f1ed8bfbf58369f4ad708", size = 114353, upload-time = "2026-03-24T12:59:08.246Z" },
 ]
+
+[[package]]
+name = "app"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "alembic" },
+    { name = "fastapi" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "basedpyright" },
+    { name = "prek" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+    { name = "skylos" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", specifier = ">=1.18.4" },
+    { name = "basedpyright", marker = "extra == 'dev'", specifier = ">=1.39.3" },
+    { name = "fastapi", specifier = ">=0.136.3" },
+    { name = "prek", marker = "extra == 'dev'", specifier = ">=0.3.10" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.1.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12" },
+    { name = "skylos", marker = "extra == 'dev'", specifier = ">=4.5.0" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "attrs"
@@ -444,38 +476,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/81/2d/ff8d91d7b564d4646
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/82/45359b62a067409bd929ae8a56b8ed13e5a8c8a61194b3c236920999ab83/fastapi-0.136.3-py3-none-any.whl", hash = "sha256:3d2a69bdf04b7e9f3afa292c3bc7a98816bbfafa10bc9b45f3f3700d2f761620", size = 117481, upload-time = "2026-05-23T18:53:16.924Z" },
 ]
-
-[[package]]
-name = "fastapi-app"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "alembic" },
-    { name = "fastapi" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "basedpyright" },
-    { name = "prek" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-    { name = "skylos" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", specifier = ">=1.18.4" },
-    { name = "basedpyright", marker = "extra == 'dev'", specifier = ">=1.39.3" },
-    { name = "fastapi", specifier = ">=0.136.3" },
-    { name = "prek", marker = "extra == 'dev'", specifier = ">=0.3.10" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.1.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12" },
-    { name = "skylos", marker = "extra == 'dev'", specifier = ">=4.5.0" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "greenlet"

@@ -1,4 +1,4 @@
-"""Tests for fastapi_app.main."""
+"""Tests for app.main."""
 
 # Standard library
 import logging
@@ -7,7 +7,7 @@ import logging
 import pytest
 
 # First party
-from fastapi_app.main import main
+from app.main import main
 
 
 def test_main(caplog: pytest.LogCaptureFixture) -> None:

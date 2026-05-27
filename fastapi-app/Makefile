@@ -4,7 +4,7 @@
 # PEP 517 artifacts (wheels + sdists)
 DIST ?= dist
 # Paths checked by format, lint, typecheck, and Skylos
-CHECK = fastapi_app tests packages/example_lib
+CHECK = app tests packages/example_lib
 
 lock:  ## Refresh uv.lock for the workspace (root + packages/* members)
 	uv lock
@@ -50,7 +50,7 @@ build: lock  ## Wheels + sdists for app and every workspace member
 build-app: lock  ## Build only app (root project)
 	rm -rf "$(DIST)"
 	mkdir -p "$(DIST)"
-	uv build --package fastapi_app -o $(DIST)
+	uv build --package app -o $(DIST)
 
 build-packages: lock  ## Internal libs only
 	@if [ ! -d packages ]; then \

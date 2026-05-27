@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fastapi_app"
+name = "app"
 authors = [{ name = "Evan Wiseman" }]
 version = "0.1.0"
 description = "FastAPI Application bundled with Alembic and basic operations."
@@ -26,10 +26,10 @@ dev = [
 ]
 
 [project.scripts]
-main = "fastapi_app.main:main"
+main = "app.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["fastapi_app"]
+packages = ["app"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
@@ -40,7 +40,7 @@ members = ["packages/*"]
 [tool.ruff]
 target-version = "py312"
 line-length = 79
-src = ["fastapi_app", "tests", "packages/example_lib"]
+src = ["app", "tests", "packages/example_lib"]
 exclude = [
     ".eggs",
     ".git",
@@ -105,7 +105,7 @@ max-nested-blocks = 3 # Maximum nested block depth (PLR1702)
 
 # Matches legacy [tool.isort]: profile=black, src_paths, sections, import_heading_*
 [tool.ruff.lint.isort]
-known-first-party = ["fastapi_app"]
+known-first-party = ["app"]
 section-order = [
     "future",
     "standard-library",
@@ -139,7 +139,7 @@ line-ending = "auto"
 [tool.basedpyright]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
-include = ["fastapi_app", "tests", "packages/example_lib"]
+include = ["app", "tests", "packages/example_lib"]
 extraPaths = [".", "packages/example_lib"]
 venvPath = "."
 venv = ".venv"
@@ -190,7 +190,7 @@ addopts = [
     "--strict-config",
     "-W error",                               # STRICT: Treat warnings as errors (catch deprecations early)
     "--tb=short",
-    "--cov=fastapi_app",
+    "--cov=app",
     "--cov-report=term-missing:skip-covered",
     "--cov-report=html",
     "--cov-report=xml",
@@ -212,7 +212,7 @@ markers = [
 # COVERAGE CONFIGURATION
 # ============================================================
 [tool.coverage.run]
-source = ["fastapi_app"]
+source = ["app"]
 branch = true # STRICT: Enable branch coverage
 omit = [
     "*/tests/*",
