@@ -38,10 +38,10 @@ class TestAppSettings:
         self,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """ENV, HOST, and PORT are loaded from the environment."""
-        monkeypatch.setenv("ENV", "staging")
-        monkeypatch.setenv("HOST", "10.0.0.2")
-        monkeypatch.setenv("PORT", "9000")
+        """APP_ENV, APP_HOST, and APP_PORT are loaded from the environment."""
+        monkeypatch.setenv("APP_ENV", "staging")
+        monkeypatch.setenv("APP_HOST", "10.0.0.2")
+        monkeypatch.setenv("APP_PORT", "9000")
         app = AppSettings()
         assert app.env == "staging"
         assert app.host == "10.0.0.2"
@@ -97,7 +97,7 @@ class TestDatabaseSettings:
     ) -> None:
         """URL is loaded from the environment."""
         monkeypatch.setenv(
-            "URL",
+            "DB_URL",
             "postgresql+psycopg://user:pass@localhost:5432/custom_db",
         )
         assert str(DatabaseSettings().url).endswith("/custom_db")

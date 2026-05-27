@@ -9,17 +9,34 @@ from pydantic import Field, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class AppSettings(BaseSettings):
+class EnvSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="_",
+        extra="ignore",
+    )
+
+
+class AppSettings(EnvSettings):
     env: str = Field(default="dev")
     host: str = Field(default="127.0.0.1")
     port: int = Field(default=8000, ge=1, le=65535)
 
+    model_config = SettingsConfigDict(
+        env_prefix="APP_",
+    )
 
-class DatabaseSettings(BaseSettings):
+
+class DatabaseSettings(EnvSettings):
     url: PostgresDsn = Field(
         default=PostgresDsn(
             "postgresql+psycopg://user:pass@localhost:5432/fastapi_app"
         )
+    )
+
+    model_config = SettingsConfigDict(
+        env_prefix="DB_",
     )
 
     @field_validator("url", mode="before")
@@ -36,13 +53,15 @@ class DatabaseSettings(BaseSettings):
         return v
 
 
-class Settings(BaseSettings):
+class Settings(EnvSettings):
     log_level: int = Field(default=logging.INFO)
 
     app: AppSettings = Field(default_factory=AppSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
 
-    model_config = SettingsConfigDict()
+    model_config = SettingsConfigDict(
+        extra="ignore",
+    )
 
     @field_validator("log_level", mode="before")
     @classmethod
