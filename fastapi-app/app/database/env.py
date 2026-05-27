@@ -1,20 +1,45 @@
 # Standard library
+from collections.abc import Iterable
+from datetime import datetime
 from logging.config import fileConfig
 
 # Third party
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from alembic.operations import MigrationScript
+from alembic.runtime.migration import MigrationContext
+from sqlalchemy import create_engine, pool
+
+# First party
+from app.core.config import settings
+from app.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+database_url = str(settings.db.url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = None
+target_metadata = Base.metadata
+
+
+def _revision_id() -> str:
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
+
+
+def process_revision_directives(
+    context: MigrationContext,
+    revision: str | Iterable[str | None] | Iterable[str],
+    directives: list[MigrationScript],
+) -> None:
+    """Use a timestamp revision id instead of a random hash."""
+    del context, revision
+    if directives:
+        directives[0].rev_id = _revision_id()
 
 
 def run_migrations_offline() -> None:
@@ -29,12 +54,13 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = database_url
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        process_revision_directives=process_revision_directives,
     )
 
     with context.begin_transaction():
@@ -48,15 +74,13 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = create_engine(database_url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            process_revision_directives=process_revision_directives,
         )
 
         with context.begin_transaction():
