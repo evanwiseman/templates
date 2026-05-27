@@ -10,6 +10,7 @@ description = "FastAPI Application bundled with Alembic and basic operations."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.18.4",
     "fastapi>=0.136.3",
 ]
 
