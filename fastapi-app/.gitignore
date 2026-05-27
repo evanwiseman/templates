@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Environment
+.env
+.venv/
+.ruff_cache/
+.pyright_cache/
+.pytest_cache/
+.skylos/
+.coverage
+coverage.xml
+htmlcov/
+.vscode/
+*.code-workspace
+
+# OS-generated files
+.DS_Store

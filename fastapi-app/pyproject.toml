@@ -1,0 +1,236 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fastapi_app"
+authors = [{ name = "Evan Wiseman" }]
+version = "0.1.0"
+description = "FastAPI Application bundled with Alembic and basic operations."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+
+[project.optional-dependencies]
+dev = [
+    "basedpyright>=1.39.3",
+    "prek>=0.3.10",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.12",
+    "skylos>=4.5.0",
+]
+
+[project.scripts]
+main = "fastapi_app.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fastapi_app"]
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+# ============================================================
+# RUFF — lint, format, security
+# ============================================================
+[tool.ruff]
+target-version = "py312"
+line-length = 79
+src = ["fastapi_app", "tests", "packages/example_lib"]
+exclude = [
+    ".eggs",
+    ".git",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+# Comprehensive rule set for strict checking
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "BLE",   # flake8-blind-except (no bare except:)
+    "C4",    # flake8-comprehensions
+    "C90",   # mccabe complexity
+    "T20",   # flake8-print (no print statements)
+    "SIM",   # flake8-simplify
+    "N",     # pep8-naming
+    "Q",     # flake8-quotes
+    "RUF",   # Ruff-specific rules
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit (security)
+    "PTH",   # flake8-use-pathlib
+    "ERA",   # eradicate (commented-out code)
+    "PL",    # pylint (includes PLR1702: too-many-nested-blocks)
+    "PERF",  # perflint (performance)
+    "ARG",   # flake8-unused-arguments
+    "FBT",   # flake8-boolean-trap (no boolean positional args)
+    "RET",   # flake8-return
+]
+
+ignore = [
+    "E501", # Line too long (formatter handles this)
+    "S603", # subprocess without shell=True (too strict)
+    "S607", # Starting a process with a partial path (too strict)
+]
+
+# Complexity limits (anti-LLM-slop)
+[tool.ruff.lint.mccabe]
+max-complexity = 10 # Maximum cyclomatic complexity
+
+[tool.ruff.lint.pylint]
+max-nested-blocks = 3 # Maximum nested block depth (PLR1702)
+
+# Per-file ignores
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401", # Allow unused imports in __init__.py
+]
+
+"tests/**/*.py" = [
+    "S101",    # Allow assert in tests
+    "PLR2004", # Allow magic values in tests
+    "FBT",     # Allow boolean args in tests
+]
+
+# Matches legacy [tool.isort]: profile=black, src_paths, sections, import_heading_*
+[tool.ruff.lint.isort]
+known-first-party = ["fastapi_app"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+[tool.ruff.lint.isort.import-heading]
+future = "Future imports"
+standard-library = "Standard library"
+third-party = "Third party"
+first-party = "First party"
+local-folder = "Local"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ============================================================
+# BASEDPYRIGHT
+# ============================================================
+[tool.basedpyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+include = ["fastapi_app", "tests", "packages/example_lib"]
+extraPaths = [".", "packages/example_lib"]
+venvPath = "."
+venv = ".venv"
+exclude = [
+    "**/__pycache__",
+    ".git",
+    ".pyright_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+# Stricter than default "strict" mode (unknowns, Any, unused, unnecessary code)
+reportAny = true
+reportExplicitAny = true
+reportIgnoreCommentWithoutRule = true
+reportMissingSuperCall = true
+reportMissingTypeStubs = true
+reportUnknownArgumentType = true
+reportUnknownMemberType = true
+reportUnknownVariableType = true
+reportUnusedClass = "error"
+reportUnusedFunction = "error"
+reportUnusedVariable = "error"
+reportUnusedImport = "error"
+reportUnnecessaryCast = "error"
+reportUnnecessaryComparison = "error"
+reportUnnecessaryContains = "error"
+reportUnnecessaryIsInstance = "error"
+reportUnnecessaryTypeIgnoreComment = "error"
+reportImplicitOverride = true
+reportDeprecated = "warning"
+reportImportCycles = "warning"
+
+# ============================================================
+# PYTEST CONFIGURATION
+# ============================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-W error",                               # STRICT: Treat warnings as errors (catch deprecations early)
+    "--tb=short",
+    "--cov=fastapi_app",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=80",                    # STRICT: Require 80% coverage
+]
+filterwarnings = [
+    "error", # Treat all warnings as errors by default
+    # Uncomment to selectively ignore specific third-party warnings if needed:
+    # "ignore::DeprecationWarning:some_noisy_library",
+    # "ignore::UserWarning:another_library",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+# ============================================================
+# COVERAGE CONFIGURATION
+# ============================================================
+[tool.coverage.run]
+source = ["fastapi_app"]
+branch = true # STRICT: Enable branch coverage
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/.venv/*",
+    "*/venv/*",
+    "*/scripts/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "@overload",
+]
