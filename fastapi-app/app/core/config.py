@@ -9,6 +9,12 @@ from pydantic import Field, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class AppSettings(BaseSettings):
+    env: str = Field(default="dev")
+    host: str = Field(default="127.0.0.1")
+    port: int = Field(default=8000, ge=1, le=65535)
+
+
 class DatabaseSettings(BaseSettings):
     url: PostgresDsn = Field(
         default=PostgresDsn(
@@ -32,6 +38,8 @@ class DatabaseSettings(BaseSettings):
 
 class Settings(BaseSettings):
     log_level: int = Field(default=logging.INFO)
+
+    app: AppSettings = Field(default_factory=AppSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
 
     model_config = SettingsConfigDict()
