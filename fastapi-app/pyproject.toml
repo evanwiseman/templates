@@ -225,6 +225,7 @@ omit = [
     "*/.venv/*",
     "*/venv/*",
     "*/scripts/*",
+    "app/database/env.py",  # Alembic CLI entrypoint; exercised via migrations, not pytest
 ]
 
 [tool.coverage.report]
