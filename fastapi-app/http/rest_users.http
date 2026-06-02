@@ -1,0 +1,33 @@
+# User endpoints
+# Requires PostgreSQL (DB_URL) and migrations: alembic upgrade head
+# Start server: make run
+
+@baseUrl = http://127.0.0.1:8000
+
+### Create user
+# @name createUser
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "password": "change-me-in-production"
+}
+
+### Create another user (change username to avoid unique constraint)
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "username": "bob",
+  "password": "change-me-in-production"
+}
+
+### Create user — duplicate username (expect 500 until you handle IntegrityError)
+POST {{baseUrl}}/users/
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "password": "any-password"
+}
