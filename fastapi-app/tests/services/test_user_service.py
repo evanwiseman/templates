@@ -3,12 +3,12 @@
 # First party
 from app.schemas import UserCreate
 from app.services.user_service import UserService
-from tests.fakes import RecordingSession, as_session
+from tests.fakes import RecordUserSession, as_session
 
 
 def test_create_hashes_password_and_persists() -> None:
     """create stores a hashed password and commits the row."""
-    recording = RecordingSession()
+    recording = RecordUserSession()
     user_in = UserCreate(
         username="alice",
         password="secret-password",
