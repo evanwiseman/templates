@@ -11,6 +11,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.4",
+    "argon2-cffi>=25.1.0",
     "fastapi>=0.136.3",
     "psycopg>=3.3.4",
     "pydantic>=2.13.3",
@@ -103,6 +104,8 @@ max-nested-blocks = 3 # Maximum nested block depth (PLR1702)
 
 "tests/**/*.py" = [
     "S101",    # Allow assert in tests
+    "S105",    # Test fixture secrets (e.g. sample passwords)
+    "S106",    # Test fixture secrets (e.g. sample passwords)
     "PLR2004", # Allow magic values in tests
     "FBT",     # Allow boolean args in tests
 ]
@@ -221,6 +224,7 @@ branch = true # STRICT: Enable branch coverage
 omit = [
     "*/tests/*",
     "*/test_*.py",
+    "*/__init__.py",
     "*/__pycache__/*",
     "*/.venv/*",
     "*/venv/*",
