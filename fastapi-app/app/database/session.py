@@ -1,7 +1,9 @@
 # Standard library
 from collections.abc import Generator
+from typing import Annotated
 
 # Third party
+from fastapi import Depends
 from sqlalchemy.orm.session import Session
 
 # Local
@@ -14,3 +16,6 @@ def get_session() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+SessionDep = Annotated[Session, Depends(get_session)]

@@ -1,4 +1,4 @@
 # Local
-from .session import get_session
+from .session import SessionDep, get_session
 
-__all__ = ["get_session"]
+__all__ = ["SessionDep", "get_session"]
