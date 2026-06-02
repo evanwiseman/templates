@@ -16,6 +16,6 @@ def hash_password(password: str):
 def verify_password(hashed_password: str, password: str) -> bool:
     try:
         _ph.verify(hashed_password, password)
-    except (VerifyMismatchError, VerificationError, InvalidHashError):
+    except VerifyMismatchError, VerificationError, InvalidHashError:
         return False
     return True

@@ -1,6 +1,6 @@
 # strict-python
 
-Python 3.12 project template with strict typing using basedpyright, Ruff, pytest, and uv.
+Python 3.14 project template with strict typing using basedpyright, Ruff, pytest, and uv.
 
 Requires [uv](https://docs.astral.sh/uv/).
 

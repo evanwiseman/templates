@@ -8,7 +8,7 @@ authors = [{ name = "Evan Wiseman" }]
 version = "0.1.0"
 description = "FastAPI Application bundled with Alembic and basic operations."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.18.4",
     "argon2-cffi>=25.1.0",
@@ -43,7 +43,7 @@ members = ["packages/*"]
 # RUFF — lint, format, security
 # ============================================================
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 79
 src = ["app", "tests", "packages/example_lib"]
 exclude = [
@@ -144,7 +144,7 @@ line-ending = "auto"
 # BASEDPYRIGHT
 # ============================================================
 [tool.basedpyright]
-pythonVersion = "3.12"
+pythonVersion = "3.14"
 typeCheckingMode = "strict"
 include = ["app", "tests", "packages/example_lib"]
 extraPaths = [".", "packages/example_lib"]

@@ -10,7 +10,7 @@ from sqlalchemy.orm.session import Session
 from .engine import SessionLocal
 
 
-def get_session() -> Generator[Session, None, None]:
+def get_session() -> Generator[Session]:
     db = SessionLocal()
     try:
         yield db

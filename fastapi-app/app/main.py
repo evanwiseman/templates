@@ -18,7 +18,7 @@ logger.setLevel(settings.log_level)
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     yield
 
 

@@ -48,10 +48,10 @@ def as_session(fake: RecordingSession | ClosingSession) -> Session:
 
 def make_get_session_override(
     fake: RecordingSession,
-) -> Callable[[], Generator[Session, None, None]]:
+) -> Callable[[], Generator[Session]]:
     """Build override for ``app.dependency_overrides[get_session]``."""
 
-    def _override() -> Generator[Session, None, None]:
+    def _override() -> Generator[Session]:
         yield as_session(fake)
 
     return _override
