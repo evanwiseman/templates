@@ -11,6 +11,7 @@ from fastapi import FastAPI
 
 # First party
 from app.core.config import settings
+from app.routers import users_router
 
 logger = logging.getLogger(__name__)
 logger.setLevel(settings.log_level)
@@ -22,6 +23,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(users_router)
 
 
 @app.get("/")
