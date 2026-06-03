@@ -1,4 +1,4 @@
-"""Tests for app.models."""
+"""Tests for base."""
 
 # Third party
 from sqlalchemy.orm import DeclarativeBase

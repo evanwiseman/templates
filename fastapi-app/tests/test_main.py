@@ -1,4 +1,4 @@
-"""Tests for app.main."""
+"""Tests for main."""
 
 # Standard library
 from unittest.mock import patch
@@ -7,7 +7,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 # First party
-from app.core.config import settings
+from app.core.config import Settings
 from app.main import app, main
 
 
@@ -19,7 +19,7 @@ def test_root() -> None:
     assert response.json() == {"message": "Hello from fast-api"}
 
 
-def test_main() -> None:
+def test_main(settings: Settings) -> None:
     """``main()`` starts uvicorn with the app and settings."""
     with patch("app.main.uvicorn.run") as mock_run:
         main()

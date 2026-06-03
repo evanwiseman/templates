@@ -1,4 +1,4 @@
-"""Tests for app.core.config."""
+"""Tests for settings."""
 
 # Standard library
 import logging
@@ -8,105 +8,13 @@ import pytest
 from pydantic import ValidationError
 
 # First party
-from app.core.config import AppSettings, DatabaseSettings, Settings
-
-
-class TestAppSettings:
-    def test_defaults(self) -> None:
-        """Default app settings match local dev values."""
-        app = AppSettings()
-        assert app.env == "dev"
-        assert app.host == "127.0.0.1"
-        assert app.port == 8000
-
-    def test_model_validate(self) -> None:
-        """App settings accept explicit values."""
-        app = AppSettings.model_validate(
-            {"env": "prod", "host": "10.0.0.1", "port": 3000}
-        )
-        assert app.env == "prod"
-        assert app.host == "10.0.0.1"
-        assert app.port == 3000
-
-    @pytest.mark.parametrize("port", [0, 65536])
-    def test_rejects_port_out_of_range(self, port: int) -> None:
-        """Port must be between 1 and 65535."""
-        with pytest.raises(ValidationError):
-            AppSettings.model_validate({"port": port})
-
-    def test_reads_from_env(
-        self,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        """APP_ENV, APP_HOST, and APP_PORT are loaded from the environment."""
-        monkeypatch.setenv("APP_ENV", "staging")
-        monkeypatch.setenv("APP_HOST", "10.0.0.2")
-        monkeypatch.setenv("APP_PORT", "9000")
-        app = AppSettings()
-        assert app.env == "staging"
-        assert app.host == "10.0.0.2"
-        assert app.port == 9000
-
-    def test_nested_on_settings_defaults(self) -> None:
-        """Settings embeds AppSettings with the same defaults."""
-        assert Settings().app == AppSettings()
-
-    def test_nested_on_settings_override(self) -> None:
-        """Settings accepts nested app overrides."""
-        settings = Settings.model_validate(
-            {"app": {"env": "prod", "host": "10.0.0.1", "port": 8080}}
-        )
-        assert settings.app.env == "prod"
-        assert settings.app.host == "10.0.0.1"
-        assert settings.app.port == 8080
-
-
-class TestDatabaseSettings:
-    def test_default_url(self) -> None:
-        """Default database URL includes a database name."""
-        db = DatabaseSettings()
-        assert str(db.url).endswith("/fastapi_app")
-
-    @pytest.mark.parametrize(
-        "url",
-        [
-            "postgresql+psycopg://user:pass@localhost:5432/",
-            "postgresql+psycopg://user:pass@localhost:5432",
-        ],
-    )
-    def test_requires_database_name(self, url: str) -> None:
-        """URLs without a database name are rejected."""
-        with pytest.raises(ValidationError, match="database must be provided"):
-            DatabaseSettings.model_validate({"url": url})
-
-    def test_coerces_str_to_postgres_dsn(self) -> None:
-        """URL validator coerces string values to PostgresDsn."""
-        url = DatabaseSettings.check_db_name(
-            "postgresql+psycopg://user:pass@localhost:5432/mydb"
-        )
-        assert str(url).endswith("/mydb")
-
-    def test_rejects_non_str_url(self) -> None:
-        """URL validator rejects values that are not str or PostgresDsn."""
-        with pytest.raises(TypeError, match="url must be str or"):
-            DatabaseSettings.check_db_name(123)
-
-    def test_reads_url_from_env(
-        self,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        """URL is loaded from the environment."""
-        monkeypatch.setenv(
-            "DB_URL",
-            "postgresql+psycopg://user:pass@localhost:5432/custom_db",
-        )
-        assert str(DatabaseSettings().url).endswith("/custom_db")
+from app.core.config import Settings
 
 
 class TestSettings:
-    def test_default_log_level(self) -> None:
+    def test_default_log_level(self, settings: Settings) -> None:
         """Default log level is INFO."""
-        assert Settings().log_level == logging.INFO
+        assert settings.log_level == logging.INFO
 
     @pytest.mark.parametrize(
         ("raw", "expected"),

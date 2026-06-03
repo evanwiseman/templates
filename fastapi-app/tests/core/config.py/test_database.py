@@ -1,6 +1,4 @@
-"""Tests for app.core.config."""
-
-# Standard library
+"""Tests for database settings."""
 
 # Third party
 import pytest
@@ -11,10 +9,9 @@ from app.core.config import DatabaseSettings
 
 
 class TestDatabaseSettings:
-    def test_default_url(self) -> None:
+    def test_default_url(self, database_settings: DatabaseSettings) -> None:
         """Default database URL includes a database name."""
-        db = DatabaseSettings()
-        assert str(db.url).endswith("/fastapi_app")
+        assert str(database_settings.url).endswith("/fastapi_app")
 
     @pytest.mark.parametrize(
         "url",

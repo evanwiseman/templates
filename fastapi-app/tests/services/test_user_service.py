@@ -1,4 +1,4 @@
-"""Tests for app.services.user_service."""
+"""Tests for user_service."""
 
 # First party
 from app.schemas import UserCreate
@@ -6,19 +6,21 @@ from app.services.user_service import UserService
 from tests.fakes import RecordUserSession, as_session
 
 
-def test_create_hashes_password_and_persists() -> None:
-    """create stores a hashed password and commits the row."""
-    recording = RecordUserSession()
-    user_in = UserCreate(
-        username="alice",
-        password="secret-password",
-    )
+class TestUserService:
+    def test_create_persists(self) -> None:
+        """Create stores the user data."""
+        recording = RecordUserSession()
+        user_data = {
+            "username": "alice",
+            "password": "secret-password",
+        }
+        user_in = UserCreate(**user_data)
+        _ = UserService.create(
+            as_session(recording),
+            user_in,
+        )
 
-    created = UserService.create(
-        as_session(recording),
-        user_in,
-    )
-
-    assert created.username == "alice"
-    assert recording.added[0].password_hash != user_in.password
-    assert recording.committed is True
+        is_commited = recording.committed
+        assert is_commited
+        assert recording.added[0].username == user_data["username"]
+        assert recording.added[0].password_hash != user_data["password"]

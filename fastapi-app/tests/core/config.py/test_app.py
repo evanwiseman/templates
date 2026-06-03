@@ -1,6 +1,4 @@
-"""Tests for app.core.config."""
-
-# Standard library
+"""Tests for app settings."""
 
 # Third party
 import pytest
@@ -11,12 +9,11 @@ from app.core.config import AppSettings, Settings
 
 
 class TestAppSettings:
-    def test_defaults(self) -> None:
+    def test_defaults(self, app_settings: AppSettings) -> None:
         """Default app settings match local dev values."""
-        app = AppSettings()
-        assert app.env == "dev"
-        assert app.host == "127.0.0.1"
-        assert app.port == 8000
+        assert app_settings.env == "dev"
+        assert app_settings.host == "127.0.0.1"
+        assert app_settings.port == 8000
 
     def test_model_validate(self) -> None:
         """App settings accept explicit values."""
@@ -46,9 +43,13 @@ class TestAppSettings:
         assert app.host == "10.0.0.2"
         assert app.port == 9000
 
-    def test_nested_on_settings_defaults(self) -> None:
+    def test_nested_on_settings_defaults(
+        self,
+        settings: Settings,
+        app_settings: AppSettings,
+    ) -> None:
         """Settings embeds AppSettings with the same defaults."""
-        assert Settings().app == AppSettings()
+        assert settings.app == app_settings
 
     def test_nested_on_settings_override(self) -> None:
         """Settings accepts nested app overrides."""
