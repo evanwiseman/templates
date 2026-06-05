@@ -71,6 +71,9 @@ class RecordUserSession:
     def commit(self) -> None:
         self.committed = True
 
+    def delete(self, user: User) -> None:
+        self.added.remove(user)
+
     def refresh(self, user: User) -> None:
         user.id = uuid7()
 

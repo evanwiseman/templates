@@ -72,3 +72,30 @@ class TestListUsers:
         assert page.offset == 0
         assert len(page.items) == 1
         assert page.items[0].username == "alice"
+
+
+class TestGetUser:
+    def test_returns_user(self) -> None:
+        """GET /users/{user_id} returns the requested user."""
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="alice",
+                password_hash="hashed",
+            ),
+        )
+        app.dependency_overrides[get_session] = make_get_session_override(
+            recording,
+        )
+        try:
+            with TestClient(app) as client:
+                response = client.get(f"{_USERS_URL}{user_id}")
+        finally:
+            app.dependency_overrides.clear()
+
+        assert response.status_code == http.HTTPStatus.OK
+        user = UserShow.model_validate(response.json())
+        assert user.id == user_id
+        assert user.username == "alice"

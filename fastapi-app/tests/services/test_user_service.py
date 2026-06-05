@@ -34,6 +34,21 @@ class TestUserService:
         assert recording.added[0].username == user_data["username"]
         assert recording.added[0].password_hash != user_data["password"]
 
+    def test_get_returns_user(self) -> None:
+        """Get returns the user when the id exists."""
+        user_id = uuid7()
+        recording = RecordUserSession()
+        db_user = User(
+            id=user_id,
+            username="alice",
+            password_hash="hashed",
+        )
+        recording.added.append(db_user)
+
+        result = UserService.get(as_session(recording), user_id)
+
+        assert result is db_user
+
     def test_get_raises_when_not_found(self) -> None:
         """Get raises when the user id does not exist."""
         recording = RecordUserSession()
@@ -44,6 +59,29 @@ class TestUserService:
 
         assert exc_info.value.status_code == http.HTTPStatus.NOT_FOUND
         assert str(missing_id) in str(exc_info.value.detail)
+
+    def test_update_persists(self) -> None:
+        """Update stores the new user data."""
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="old",
+                password_hash="old-hash",
+            ),
+        )
+        user_in = UserUpdate(username="new", password="new-password")
+
+        result = UserService.update(
+            as_session(recording),
+            user_id,
+            user_in,
+        )
+
+        assert recording.committed
+        assert result.username == "new"
+        assert result.password_hash != "new-password"
 
     def test_update_raises_when_not_found(self) -> None:
         """Update raises when the user id does not exist."""
@@ -79,3 +117,31 @@ class TestUserService:
         assert len(users) == 2
         assert users[0].username == "user-1"
         assert users[1].username == "user-2"
+
+    def test_destroy_removes_user(self) -> None:
+        """Destroy deletes the user."""
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="alice",
+                password_hash="hashed",
+            ),
+        )
+
+        UserService.destroy(as_session(recording), user_id)
+
+        assert recording.committed
+        assert recording.added == []
+
+    def test_destroy_raises_when_not_found(self) -> None:
+        """Destroy raises when the user id does not exist."""
+        recording = RecordUserSession()
+        missing_id = uuid7()
+
+        with pytest.raises(HTTPException) as exc_info:
+            UserService.destroy(as_session(recording), missing_id)
+
+        assert exc_info.value.status_code == http.HTTPStatus.NOT_FOUND
+        assert str(missing_id) in str(exc_info.value.detail)
