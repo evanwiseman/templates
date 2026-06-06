@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 # Third party
 import uvicorn
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 
 # First party
 from app.core.config import settings
@@ -24,6 +25,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(users_router)
+add_pagination(app)
 
 
 @app.get("/")

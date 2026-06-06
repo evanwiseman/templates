@@ -7,6 +7,7 @@ from uuid import uuid7
 # Third party
 import pytest
 from fastapi import HTTPException
+from fastapi_pagination import LimitOffsetParams
 
 # First party
 from app.models.user import User
@@ -95,28 +96,31 @@ class TestUserService:
         assert exc_info.value.status_code == http.HTTPStatus.NOT_FOUND
         assert str(missing_id) in str(exc_info.value.detail)
 
-    def test_get_all_paginates(self) -> None:
-        """Get all returns a page of users and the total count."""
+    def test_get_pages_paginates(self) -> None:
+        """Get pages returns one page of users and the total count."""
         recording = RecordUserSession()
-        for index in range(5):
-            recording.added.append(
-                User(
-                    id=uuid7(),
-                    username=f"user-{index}",
-                    password_hash="hashed",
-                ),
+        users = [
+            User(
+                id=uuid7(),
+                username=f"user-{index}",
+                password_hash="hashed",
             )
+            for index in range(5)
+        ]
+        recording.added.extend(users)
+        params = LimitOffsetParams(limit=2, offset=1)
 
-        users, total = UserService.get_all(
+        page = UserService.get_pages(
             as_session(recording),
-            limit=2,
-            offset=1,
+            params=params,
         )
 
-        assert total == 5
-        assert len(users) == 2
-        assert users[0].username == "user-1"
-        assert users[1].username == "user-2"
+        assert page.total == 5
+        assert page.limit == 2
+        assert page.offset == 1
+        assert len(page.items) == 2
+        assert page.items[0].username == "user-1"
+        assert page.items[1].username == "user-2"
 
     def test_destroy_removes_user(self) -> None:
         """Destroy deletes the user."""

@@ -5,10 +5,10 @@ from uuid import UUID
 
 # Third party
 from fastapi import APIRouter, status
+from fastapi_pagination import LimitOffsetPage
 
 # First party
-from app.core.pagination import Page, PaginationDep
-from app.database import SessionDep
+from app.dependencies import PaginationParamsDep, SessionDep
 from app.schemas.users import UserCreate, UserShow
 from app.services.user_service import UserService
 
@@ -40,21 +40,16 @@ def get_user(user_id: UUID, session: SessionDep) -> UserShow:
 @router.get(
     "",
     status_code=status.HTTP_200_OK,
-    response_model=Page[UserShow],
+    response_model=LimitOffsetPage[UserShow],
 )
-def list_users(
+def get_users(
     session: SessionDep,
-    pagination: PaginationDep,
-) -> Page[UserShow]:
+    params: PaginationParamsDep,
+) -> LimitOffsetPage[UserShow]:
     """List users."""
-    users, total = UserService.get_all(
-        session,
-        limit=pagination.limit,
-        offset=pagination.offset,
-    )
-    return Page(
-        items=[UserShow.model_validate(user) for user in users],
-        total=total,
-        limit=pagination.limit,
-        offset=pagination.offset,
+    page = UserService.get_pages(session, params=params)
+    return LimitOffsetPage[UserShow].create(
+        items=[UserShow.model_validate(user) for user in page.items],
+        params=params,
+        total=page.total,
     )

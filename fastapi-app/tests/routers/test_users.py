@@ -6,9 +6,10 @@ from uuid import uuid7
 
 # Third party
 from fastapi.testclient import TestClient
+from fastapi_pagination import LimitOffsetPage
+from pydantic import TypeAdapter
 
 # First party
-from app.core.pagination import Page
 from app.database.session import get_session
 from app.main import app
 from app.models.user import User
@@ -16,9 +17,10 @@ from app.schemas import UserShow
 from tests.fakes import RecordUserSession, make_get_session_override
 
 _USERS_URL = "/users/"
+UserPage = TypeAdapter(LimitOffsetPage[UserShow])
 
 
-class TestCreateNewUser:
+class TestPostUser:
     def test_calls_user_service(self) -> None:
         """POST /users injects session via Depends(get_session)."""
         recording = RecordUserSession()
@@ -45,7 +47,7 @@ class TestCreateNewUser:
         assert recording.committed
 
 
-class TestListUsers:
+class TestGetUsers:
     def test_returns_paginated_users(self) -> None:
         """GET /users returns a paginated user list."""
         recording = RecordUserSession()
@@ -66,9 +68,9 @@ class TestListUsers:
             app.dependency_overrides.clear()
 
         assert response.status_code == http.HTTPStatus.OK
-        page = Page[UserShow].model_validate(response.json())
+        page = UserPage.validate_python(response.json())
         assert page.total == 1
-        assert page.limit == 20
+        assert page.limit == 50
         assert page.offset == 0
         assert len(page.items) == 1
         assert page.items[0].username == "alice"

@@ -1,6 +1,7 @@
 """User-related test doubles."""
 
 # Standard library
+import re
 from collections.abc import Callable, Generator
 from dataclasses import dataclass, field
 from typing import cast
@@ -8,9 +9,32 @@ from uuid import uuid7
 
 # Third party
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 
 # First party
 from app.models.user import User
+
+_LIMIT_RE = re.compile(r"LIMIT (\d+)", re.IGNORECASE)
+_OFFSET_RE = re.compile(r"OFFSET (\d+)", re.IGNORECASE)
+
+
+@dataclass
+class FakeScalarResult:
+    items: list[User]
+
+    def all(self) -> list[User]:
+        return self.items
+
+
+def _select_limit_offset(
+    statement: Select[tuple[User]],
+) -> tuple[int | None, int]:
+    sql = str(statement.compile(compile_kwargs={"literal_binds": True}))
+    limit_match = _LIMIT_RE.search(sql)
+    offset_match = _OFFSET_RE.search(sql)
+    limit = int(limit_match.group(1)) if limit_match else None
+    offset = int(offset_match.group(1)) if offset_match else 0
+    return limit, offset
 
 
 @dataclass
@@ -67,6 +91,14 @@ class RecordUserSession:
         if model is not User:
             return FakeUserQuery([])
         return FakeUserQuery(list(self.added))
+
+    def scalar(self, _statement: object) -> int | None:
+        return len(self.added)
+
+    def scalars(self, statement: Select[tuple[User]]) -> FakeScalarResult:
+        limit, offset = _select_limit_offset(statement)
+        end = None if limit is None else offset + limit
+        return FakeScalarResult(list(self.added)[offset:end])
 
     def commit(self) -> None:
         self.committed = True

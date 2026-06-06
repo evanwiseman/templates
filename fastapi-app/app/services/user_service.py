@@ -3,6 +3,8 @@ from uuid import UUID
 
 # Third party
 from fastapi import HTTPException, status
+from fastapi_pagination import LimitOffsetPage, LimitOffsetParams
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 # First party
@@ -23,15 +25,21 @@ class UserService:
         return db_user
 
     @staticmethod
-    def get_all(
+    def get_pages(
         session: Session,
         *,
-        limit: int,
-        offset: int,
-    ) -> tuple[list[User], int]:
-        total = session.query(User).count()
-        users = session.query(User).limit(limit).offset(offset).all()
-        return users, total
+        params: LimitOffsetParams,
+    ) -> LimitOffsetPage[User]:
+        query = select(User).order_by(User.created_at)
+        total = session.scalar(select(func.count()).select_from(User)) or 0
+        users = session.scalars(
+            query.limit(params.limit).offset(params.offset),
+        ).all()
+        return LimitOffsetPage.create(
+            items=list(users),
+            params=params,
+            total=total,
+        )
 
     @staticmethod
     def create(session: Session, user: UserCreate) -> User:
