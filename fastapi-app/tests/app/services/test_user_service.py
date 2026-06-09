@@ -13,7 +13,7 @@ from fastapi_pagination import LimitOffsetParams
 from app.models.user import User
 from app.schemas import UserCreate, UserUpdate
 from app.services.user_service import UserService
-from tests.fakes import RecordUserSession, as_session
+from tests.app.fakes import RecordUserSession, as_session
 
 
 class TestUserService:
@@ -72,7 +72,11 @@ class TestUserService:
                 password_hash="old-hash",
             ),
         )
-        user_in = UserUpdate(username="new", password="new-password")
+        user_in = UserUpdate(
+            username="new",
+            old_password="old-password",
+            new_password="new-password",
+        )
 
         result = UserService.update(
             as_session(recording),
@@ -88,7 +92,11 @@ class TestUserService:
         """Update raises when the user id does not exist."""
         recording = RecordUserSession()
         missing_id = uuid7()
-        user_in = UserUpdate(username="alice", password="secret-password")
+        user_in = UserUpdate(
+            username="alice",
+            old_password="old_password",
+            new_password="secret-password",
+        )
 
         with pytest.raises(HTTPException) as exc_info:
             UserService.update(as_session(recording), missing_id, user_in)

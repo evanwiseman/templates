@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 # First party
 from app.database.session import get_session
-from tests.fakes import ClosingSession
+from tests.app.fakes import ClosingSession
 
 
 class TestGetSession:

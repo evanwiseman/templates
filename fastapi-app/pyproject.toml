@@ -190,10 +190,12 @@ reportImportCycles = "warning"
 # ============================================================
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
+    "--import-mode=importlib",
     "--strict-markers",
     "--strict-config",
     "-W error",                               # STRICT: Treat warnings as errors (catch deprecations early)

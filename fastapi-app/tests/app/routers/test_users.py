@@ -14,7 +14,7 @@ from app.database.session import get_session
 from app.main import app
 from app.models.user import User
 from app.schemas import UserShow
-from tests.fakes import RecordUserSession, make_get_session_override
+from tests.app.fakes import RecordUserSession, make_get_session_override
 
 _USERS_URL = "/users/"
 UserPage = TypeAdapter(LimitOffsetPage[UserShow])
