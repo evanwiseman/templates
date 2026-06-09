@@ -10,6 +10,7 @@ from fastapi_pagination import LimitOffsetPage
 from pydantic import TypeAdapter
 
 # First party
+from app.core.security import hash_password
 from app.database.session import get_session
 from app.main import app
 from app.models.user import User
@@ -101,3 +102,70 @@ class TestGetUser:
         user = UserShow.model_validate(response.json())
         assert user.id == user_id
         assert user.username == "alice"
+
+
+class TestPutUser:
+    def test_updates_user(self) -> None:
+        """PUT /users/{user_id} updates the user password."""
+        old_password = "old-password"
+        new_password = "new-password"
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="alice",
+                password_hash=hash_password(old_password),
+            ),
+        )
+        app.dependency_overrides[get_session] = make_get_session_override(
+            recording,
+        )
+        try:
+            with TestClient(app) as client:
+                response = client.put(
+                    f"{_USERS_URL}{user_id}",
+                    json={
+                        "old_password": old_password,
+                        "new_password": new_password,
+                    },
+                )
+        finally:
+            app.dependency_overrides.clear()
+
+        assert response.status_code == http.HTTPStatus.OK
+        user = UserShow.model_validate(response.json())
+        assert user.id == recording.added[0].id
+        assert user.username == "alice"
+        assert recording.committed
+
+
+class TestDeleteUser:
+    def test_deletes_user(self) -> None:
+        """DELETE /users/{user_id} removes the user."""
+        password = "secret-password"
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="alice",
+                password_hash=hash_password(password),
+            ),
+        )
+        app.dependency_overrides[get_session] = make_get_session_override(
+            recording,
+        )
+        try:
+            with TestClient(app) as client:
+                response = client.request(
+                    "DELETE",
+                    f"{_USERS_URL}{user_id}",
+                    json={"password": password},
+                )
+        finally:
+            app.dependency_overrides.clear()
+
+        assert response.status_code == http.HTTPStatus.NO_CONTENT
+        assert recording.committed
+        assert recording.added == []

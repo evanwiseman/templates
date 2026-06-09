@@ -2,16 +2,20 @@
 
 # Standard library
 import http
+from unittest.mock import patch
 from uuid import uuid7
 
 # Third party
 import pytest
+from argon2.exceptions import InvalidHashError
 from fastapi import HTTPException
 from fastapi_pagination import LimitOffsetParams
 
 # First party
+from app.core.security import hash_password, verify_password
 from app.models.user import User
 from app.schemas import UserCreate, UserUpdate
+from app.schemas.users import UserDestroy
 from app.services.user_service import UserService
 from tests.app.fakes import RecordUserSession, as_session
 
@@ -62,20 +66,21 @@ class TestUserService:
         assert str(missing_id) in str(exc_info.value.detail)
 
     def test_update_persists(self) -> None:
-        """Update stores the new user data."""
+        """Update stores the new password when the old password matches."""
+        old_password = "old-password"
+        new_password = "new-password"
         user_id = uuid7()
         recording = RecordUserSession()
         recording.added.append(
             User(
                 id=user_id,
-                username="old",
-                password_hash="old-hash",
+                username="alice",
+                password_hash=hash_password(old_password),
             ),
         )
         user_in = UserUpdate(
-            username="new",
-            old_password="old-password",
-            new_password="new-password",
+            old_password=old_password,
+            new_password=new_password,
         )
 
         result = UserService.update(
@@ -85,16 +90,69 @@ class TestUserService:
         )
 
         assert recording.committed
-        assert result.username == "new"
-        assert result.password_hash != "new-password"
+        assert result.username == "alice"
+        assert result.password_hash != new_password
+        assert verify_password(result.password_hash, new_password)
+
+    def test_update_raises_when_unauthorized(self) -> None:
+        """Update raises when the old password does not match."""
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="alice",
+                password_hash=hash_password("correct-password"),
+            ),
+        )
+        user_in = UserUpdate(
+            old_password="wrong-password",
+            new_password="new-password",
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            UserService.update(as_session(recording), user_id, user_in)
+
+        assert exc_info.value.status_code == http.HTTPStatus.UNAUTHORIZED
+        assert str(user_id) in str(exc_info.value.detail)
+
+    def test_update_raises_when_hash_fails(self) -> None:
+        """Update raises when password hashing fails."""
+        old_password = "old-password"
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="alice",
+                password_hash=hash_password(old_password),
+            ),
+        )
+        user_in = UserUpdate(
+            old_password=old_password,
+            new_password="new-password",
+        )
+
+        with (
+            patch(
+                "app.services.user_service.hash_password",
+                side_effect=InvalidHashError(),
+            ),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            UserService.update(as_session(recording), user_id, user_in)
+
+        assert (
+            exc_info.value.status_code == http.HTTPStatus.INTERNAL_SERVER_ERROR
+        )
+        assert str(user_id) in str(exc_info.value.detail)
 
     def test_update_raises_when_not_found(self) -> None:
         """Update raises when the user id does not exist."""
         recording = RecordUserSession()
         missing_id = uuid7()
         user_in = UserUpdate(
-            username="alice",
-            old_password="old_password",
+            old_password="old-password",
             new_password="secret-password",
         )
 
@@ -131,21 +189,48 @@ class TestUserService:
         assert page.items[1].username == "user-2"
 
     def test_destroy_removes_user(self) -> None:
-        """Destroy deletes the user."""
+        """Destroy deletes the user when the password matches."""
+        password = "secret-password"
         user_id = uuid7()
         recording = RecordUserSession()
         recording.added.append(
             User(
                 id=user_id,
                 username="alice",
-                password_hash="hashed",
+                password_hash=hash_password(password),
             ),
         )
 
-        UserService.destroy(as_session(recording), user_id)
+        UserService.destroy(
+            as_session(recording),
+            user_id,
+            UserDestroy(password=password),
+        )
 
         assert recording.committed
         assert recording.added == []
+
+    def test_destroy_raises_when_unauthorized(self) -> None:
+        """Destroy raises when the password does not match."""
+        user_id = uuid7()
+        recording = RecordUserSession()
+        recording.added.append(
+            User(
+                id=user_id,
+                username="alice",
+                password_hash=hash_password("correct-password"),
+            ),
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            UserService.destroy(
+                as_session(recording),
+                user_id,
+                UserDestroy(password="wrong-password"),
+            )
+
+        assert exc_info.value.status_code == http.HTTPStatus.UNAUTHORIZED
+        assert str(user_id) in str(exc_info.value.detail)
 
     def test_destroy_raises_when_not_found(self) -> None:
         """Destroy raises when the user id does not exist."""
@@ -153,7 +238,11 @@ class TestUserService:
         missing_id = uuid7()
 
         with pytest.raises(HTTPException) as exc_info:
-            UserService.destroy(as_session(recording), missing_id)
+            UserService.destroy(
+                as_session(recording),
+                missing_id,
+                UserDestroy(password="secret-password"),
+            )
 
         assert exc_info.value.status_code == http.HTTPStatus.NOT_FOUND
         assert str(missing_id) in str(exc_info.value.detail)

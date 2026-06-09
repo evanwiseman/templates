@@ -9,21 +9,11 @@ from fastapi_pagination import LimitOffsetPage
 
 # First party
 from app.dependencies import PaginationParamsDep, SessionDep
-from app.schemas.users import UserCreate, UserShow
+from app.schemas import UserUpdate
+from app.schemas.users import UserCreate, UserDestroy, UserShow
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-@router.post(
-    "",
-    status_code=status.HTTP_201_CREATED,
-    response_model=UserShow,
-)
-def post_user(user: UserCreate, session: SessionDep) -> UserShow:
-    """Create a user."""
-    created = UserService.create(session, user)
-    return UserShow.model_validate(created)
 
 
 @router.get(
@@ -53,3 +43,36 @@ def get_users(
         params=params,
         total=page.total,
     )
+
+
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=UserShow,
+)
+def post_user(user: UserCreate, session: SessionDep) -> UserShow:
+    """Create a user."""
+    created = UserService.create(session, user)
+    return UserShow.model_validate(created)
+
+
+@router.put(
+    "/{user_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UserShow,
+)
+def put_user(
+    user_id: UUID,
+    user: UserUpdate,
+    session: SessionDep,
+) -> UserShow:
+    updated = UserService.update(session, user_id, user)
+    return UserShow.model_validate(updated)
+
+
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_user(user_id: UUID, user: UserDestroy, session: SessionDep) -> None:
+    UserService.destroy(session, user_id, user)

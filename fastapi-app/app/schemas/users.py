@@ -18,5 +18,9 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username: str
+    old_password: str
+    new_password: str
+
+
+class UserDestroy(BaseModel):
     password: str
