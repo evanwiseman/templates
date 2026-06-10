@@ -1,5 +1,5 @@
 # Local
-from .users import UserCreate, UserShow, UserUpdate
+from .user import UserCreate, UserShow, UserUpdate
 
 __all__ = [
     "UserCreate",

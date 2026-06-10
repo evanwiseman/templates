@@ -1,5 +1,5 @@
 # Standard library
-from datetime import date
+from datetime import datetime
 from uuid import UUID, uuid7
 
 # Third party
@@ -20,5 +20,5 @@ class User(Base):
     )
     username: Mapped[str] = mapped_column(unique=True, index=True)
     password_hash: Mapped[str] = mapped_column()
-    created_at: Mapped[date] = mapped_column(server_default=func.now())
-    updated_at: Mapped[date] = mapped_column(server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
