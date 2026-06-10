@@ -6,8 +6,8 @@ from uuid import UUID, uuid7
 from sqlalchemy import Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-# Local
-from .base import Base
+# First party
+from app.database.base import Base
 
 
 class User(Base):

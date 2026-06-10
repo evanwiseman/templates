@@ -8,15 +8,12 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi_pagination import LimitOffsetPage
 
 # First party
-from app.dependencies import PaginationParamsDep, SessionDep
-from app.errors.user import (
-    UserNotFoundError,
-    UserUnauthorizedError,
-    UserUpdateError,
-)
-from app.schemas import UserUpdate
-from app.schemas.user import UserCreate, UserDestroy, UserShow
-from app.services.user_service import UserService
+from app.core.dependencies import PaginationParamsDep, SessionDep
+
+# Local
+from .errors import UserNotFoundError, UserUnauthorizedError, UserUpdateError
+from .schemas import UserCreate, UserDestroy, UserShow, UserUpdate
+from .services import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 

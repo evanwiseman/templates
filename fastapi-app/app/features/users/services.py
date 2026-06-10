@@ -14,13 +14,15 @@ from sqlalchemy.sql.selectable import Select
 
 # First party
 from app.core.security import hash_password, verify_password
-from app.errors.user import (
+
+# Local
+from .errors import (
     UserNotFoundError,
     UserUnauthorizedError,
     UserUpdateError,
 )
-from app.models.user import User
-from app.schemas.user import UserCreate, UserDestroy, UserUpdate
+from .models import User
+from .schemas import UserCreate, UserDestroy, UserUpdate
 
 
 class UserListResult(NamedTuple):

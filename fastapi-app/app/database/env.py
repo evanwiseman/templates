@@ -1,4 +1,6 @@
 # Standard library
+import importlib
+import pkgutil
 from collections.abc import Iterable
 from datetime import datetime
 from logging.config import fileConfig
@@ -10,8 +12,9 @@ from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine, pool
 
 # First party
+import app.features
 from app.core.config import settings
-from app.models import Base
+from app.database.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,6 +27,15 @@ database_url = str(settings.db.url)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+
+def _import_feature_models() -> None:
+    prefix = f"{app.features.__name__}."
+    for module in pkgutil.walk_packages(app.features.__path__, prefix):
+        if module.name.endswith(".models"):
+            importlib.import_module(module.name)
+
+
+_import_feature_models()
 target_metadata = Base.metadata
 
 

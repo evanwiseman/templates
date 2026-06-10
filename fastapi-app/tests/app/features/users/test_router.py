@@ -14,9 +14,7 @@ from sqlalchemy.orm import Session
 
 # First party
 from app.core.security import hash_password, verify_password
-from app.errors import UserUpdateError
-from app.models.user import User
-from app.schemas import UserShow
+from app.features.users import User, UserShow, UserUpdateError
 
 _USERS_URL = "/users/"
 UserPage = TypeAdapter(LimitOffsetPage[UserShow])
@@ -227,7 +225,7 @@ class TestPutUser:
         db_session.commit()
 
         with patch(
-            "app.services.user_service.UserService.update",
+            "app.features.users.router.UserService.update",
             side_effect=UserUpdateError(db_user.id),
         ):
             response = client.put(
@@ -261,14 +259,15 @@ class TestDeleteUser:
         )
         db_session.add(db_user)
         db_session.commit()
+        user_id = db_user.id
 
         response = client.request(
             "DELETE",
-            f"{_USERS_URL}{db_user.id}",
+            f"{_USERS_URL}{user_id}",
             json={"password": password},
         )
         assert response.status_code == http.HTTPStatus.NO_CONTENT
-        assert db_session.get(User, db_user.id) is None
+        assert db_session.get(User, user_id) is None
 
     def test_returns_not_found(self, client: TestClient) -> None:
         """DELETE /users/{user_id} returns 404 when user does not exist.
