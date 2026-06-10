@@ -1,11 +1,11 @@
 # strict-python
 
-Python 3.12 project template with strict typing using basedpyright, Ruff, pytest, and uv.
+Python 3.14 project template with strict typing using basedpyright, Ruff, pytest, and uv.
 
 Requires [uv](https://docs.astral.sh/uv/).
 
 ```
-fastapi_app/          # application package (rename after cloning)
+app/          # application package (rename after cloning)
 packages/example_lib/   # optional uv workspace library (example)
 tests/
 ```
@@ -22,7 +22,7 @@ mv strict-python/* strict-python/.??* .
 rmdir strict-python
 ```
 
-Rename the package and project metadata (`fastapi_app/`, `pyproject.toml` `name`, imports in `tests/`). Then:
+Rename the package and project metadata (`app/`, `pyproject.toml` `name`, imports in `tests/`). Then:
 
 ```bash
 make install

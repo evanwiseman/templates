@@ -3,13 +3,22 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fastapi_app"
+name = "app"
 authors = [{ name = "Evan Wiseman" }]
 version = "0.1.0"
 description = "FastAPI Application bundled with Alembic and basic operations."
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = []
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.18.4",
+    "argon2-cffi>=25.1.0",
+    "fastapi>=0.136.3",
+    "fastapi-pagination>=0.15.14",
+    "psycopg>=3.3.4",
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
+    "uvicorn>=0.46.0",
+]
 
 
 [project.optional-dependencies]
@@ -23,10 +32,10 @@ dev = [
 ]
 
 [project.scripts]
-main = "fastapi_app.main:main"
+main = "app.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["fastapi_app"]
+packages = ["app"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
@@ -35,9 +44,9 @@ members = ["packages/*"]
 # RUFF — lint, format, security
 # ============================================================
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 79
-src = ["fastapi_app", "tests", "packages/example_lib"]
+src = ["app", "tests", "packages/example_lib"]
 exclude = [
     ".eggs",
     ".git",
@@ -96,13 +105,15 @@ max-nested-blocks = 3 # Maximum nested block depth (PLR1702)
 
 "tests/**/*.py" = [
     "S101",    # Allow assert in tests
+    "S105",    # Test fixture secrets (e.g. sample passwords)
+    "S106",    # Test fixture secrets (e.g. sample passwords)
     "PLR2004", # Allow magic values in tests
     "FBT",     # Allow boolean args in tests
 ]
 
 # Matches legacy [tool.isort]: profile=black, src_paths, sections, import_heading_*
 [tool.ruff.lint.isort]
-known-first-party = ["fastapi_app"]
+known-first-party = ["app"]
 section-order = [
     "future",
     "standard-library",
@@ -134,9 +145,9 @@ line-ending = "auto"
 # BASEDPYRIGHT
 # ============================================================
 [tool.basedpyright]
-pythonVersion = "3.12"
+pythonVersion = "3.14"
 typeCheckingMode = "strict"
-include = ["fastapi_app", "tests", "packages/example_lib"]
+include = ["app", "tests", "packages/example_lib"]
 extraPaths = [".", "packages/example_lib"]
 venvPath = "."
 venv = ".venv"
@@ -179,15 +190,17 @@ reportImportCycles = "warning"
 # ============================================================
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
+    "--import-mode=importlib",
     "--strict-markers",
     "--strict-config",
     "-W error",                               # STRICT: Treat warnings as errors (catch deprecations early)
     "--tb=short",
-    "--cov=fastapi_app",
+    "--cov=app",
     "--cov-report=term-missing:skip-covered",
     "--cov-report=html",
     "--cov-report=xml",
@@ -209,15 +222,17 @@ markers = [
 # COVERAGE CONFIGURATION
 # ============================================================
 [tool.coverage.run]
-source = ["fastapi_app"]
+source = ["app"]
 branch = true # STRICT: Enable branch coverage
 omit = [
     "*/tests/*",
     "*/test_*.py",
+    "*/__init__.py",
     "*/__pycache__/*",
     "*/.venv/*",
     "*/venv/*",
     "*/scripts/*",
+    "app/database/env.py",  # Alembic CLI entrypoint; exercised via migrations, not pytest
 ]
 
 [tool.coverage.report]
