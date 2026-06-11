@@ -21,16 +21,35 @@ git clone https://github.com/evanwiseman/templates.git
 Rename the package and project metadata (`project_name/`, `pyproject.toml` `name`, imports in `tests/`). Then:
 
 ```bash
-make install
-make run
+make install          # copies .env.example -> .env if missing
+# start PostgreSQL and match DB_URL in .env (default: localhost:5432/fastapi_app)
+uv run alembic upgrade head
+make run              # needs live DB — engine connects at import
 make check
 ```
 
-Copy `.env.example` to `.env` when you add settings that read from the environment.
+### Database
+
+App uses PostgreSQL via SQLAlchemy. No `docker-compose` or migration Makefile targets yet — run Alembic directly.
+
+1. **Start PostgreSQL** — local install, Docker, or your own host. Create a database matching `DB_URL` in `.env` (see `.env.example`).
+2. **Configure `.env`** — `make install` seeds `.env` from `.env.example` if absent. Set `DB_URL` (e.g. `postgresql+psycopg://user:pass@localhost:5432/fastapi_app`).
+3. **Apply migrations** — from repo root:
+
+   ```bash
+   uv run alembic upgrade head
+   ```
+
+4. **Run the app** — `make run` calls `uv run main`. The SQLAlchemy `engine` is created when `project_name.app.database.engine` is imported, so PostgreSQL must already be reachable or startup fails before the server binds.
+
+**New migrations** (no `make migrate` / `make revision` targets):
 
 ```bash
-cp .env.example .env
+uv run alembic revision --autogenerate -m "describe change"
+uv run alembic upgrade head
 ```
+
+See `project_name/app/database/` for Alembic env and versions.
 
 ## Usage
 
