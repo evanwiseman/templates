@@ -18,10 +18,11 @@ Clone templates, copy and paste fastapi-app.
 git clone https://github.com/evanwiseman/templates.git
 ```
 
-Rename the package and project metadata (`project_name/`, `pyproject.toml` `name`, imports in `tests/`). Then:
+Rename the package, then finish setup:
 
 ```bash
-make install          # copies .env.example -> .env if missing
+make rename NAME=your_package   # one-time; rewrites config, source, and tests
+make install                    # copies .env.example -> .env if missing
 # start PostgreSQL and match DB_URL in .env (default: localhost:5432/fastapi_app)
 uv run alembic upgrade head
 make run              # needs live DB — engine connects at import
@@ -51,11 +52,41 @@ uv run alembic upgrade head
 
 See `project_name/app/database/` for Alembic env and versions.
 
+### Rename / refactor
+
+```bash
+make rename NAME=your_package
+```
+
+`scripts/rename_project.sh` renames `project_name/` and updates the paths below. Skips `docs/`, `uv.lock`, and `.venv`. Manual fallback:
+
+**`project_name/`** — rename the directory.
+
+**`pyproject.toml`**
+
+- `[project] name`
+- `[project.scripts] main`
+- `[tool.hatch.build.targets.wheel] packages`
+- `[tool.ruff] src` and `[tool.ruff.lint.isort] known-first-party`
+- `[tool.basedpyright] include`
+- pytest `--cov=` and `[tool.coverage.run] source` / `omit`
+
+**`alembic.ini`** — `script_location` under `<package>/app/database`
+
+**`Makefile`** — `CHECK` paths and `build-project --package`
+
+**`.pre-commit-config.yaml`** — Ruff and basedpyright hook paths
+
+**Source + tests** — `from project_name.app.*` / `import project_name.*` under `project_name/` and `tests/`
+
+After rename: `make install`, `make check`, then delete `scripts/rename_project.sh` (one-time use).
+
 ## Usage
 
 | Target                | Description                                                             |
 | --------------------- | ----------------------------------------------------------------------- |
 | `make install`        | Install project + dev tools                                             |
+| `make rename`         | Rename `project_name` (`NAME=your_package`)                             |
 | `make run`            | Run the application                                                     |
 | `make check`          | Local quality pipeline (format may autofix, then lint, typecheck, test) |
 | `make ci`             | Read-only quality gate (same checks as GitHub Actions CI)               |

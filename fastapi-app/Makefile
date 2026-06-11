@@ -1,4 +1,4 @@
-.PHONY: lock install run format lint typecheck skylos test pre-commit \
+.PHONY: lock install run rename format lint typecheck skylos test pre-commit \
 	check ci clean build build-all build-project build-packages help
 
 # PEP 517 artifacts (wheels + sdists)
@@ -12,6 +12,11 @@ lock:  ## Refresh uv.lock for the workspace (root + packages/* members)
 install: lock  ## Install project + dev tools (linters, tests, etc.)
 	uv sync --extra dev
 	@test -f .env || cp .env.example .env
+
+rename:  ## Rename project_name to NAME=your_package (one-time setup)
+	@test -n "$(NAME)" || (echo "Usage: make rename NAME=your_package" >&2; exit 1)
+	@./scripts/rename_project.sh "$(NAME)"
+	@$(MAKE) lock
 
 run:  ## Run the application
 	uv run main
