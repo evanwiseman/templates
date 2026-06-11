@@ -2,7 +2,6 @@
 
 # Standard library
 from unittest.mock import patch
-from uuid import uuid7
 
 # Third party
 from fastapi import status
@@ -15,6 +14,7 @@ from sqlalchemy.orm import Session
 # First party
 import project_name.app.features.users.router as router_module
 from project_name.app.core.security import hash_password, verify_password
+from project_name.app.core.uuid import uuid7
 from project_name.app.features.users import User, UserShow, UserUpdateError
 
 # Local

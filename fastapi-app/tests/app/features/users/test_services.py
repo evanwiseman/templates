@@ -3,7 +3,6 @@
 # Standard library
 from datetime import datetime, timedelta
 from unittest.mock import patch
-from uuid import uuid7
 
 # Third party
 import pytest
@@ -14,6 +13,7 @@ from sqlalchemy.orm import Session
 # First party
 import project_name.app.features.users.services as services_module
 from project_name.app.core.security import hash_password, verify_password
+from project_name.app.core.uuid import uuid7
 from project_name.app.features.users import (
     User,
     UserCreate,
