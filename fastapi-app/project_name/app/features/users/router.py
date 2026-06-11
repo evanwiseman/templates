@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi_pagination import LimitOffsetPage
 
 # First party
-from project_name.app.core.dependencies import PaginationParamsDep, SessionDep
+from project_name.app.dependencies import PaginationParamsDep, SessionDep
 
 # Local
 from .errors import UserNotFoundError, UserUnauthorizedError, UserUpdateError
