@@ -3,11 +3,7 @@ from typing import NamedTuple
 from uuid import UUID
 
 # Third party
-from argon2.exceptions import (
-    InvalidHashError,
-    VerificationError,
-    VerifyMismatchError,
-)
+from argon2.exceptions import HashingError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
@@ -43,11 +39,7 @@ def _apply_update(user: User, params: UserUpdate) -> User:
         user.password_hash = hash_password(
             params.new_password.get_secret_value(),
         )
-    except (
-        VerifyMismatchError,
-        VerificationError,
-        InvalidHashError,
-    ) as exc:
+    except HashingError as exc:
         raise UserUpdateError() from exc
     return user
 

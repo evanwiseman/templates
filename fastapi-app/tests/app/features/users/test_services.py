@@ -7,7 +7,7 @@ from uuid import uuid7
 
 # Third party
 import pytest
-from argon2.exceptions import InvalidHashError
+from argon2.exceptions import HashingError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -212,7 +212,7 @@ class TestUpdate:
             patch.object(
                 services_module,
                 "hash_password",
-                side_effect=InvalidHashError(),
+                side_effect=HashingError(),
             ),
             pytest.raises(UserUpdateError),
         ):
