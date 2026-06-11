@@ -249,7 +249,7 @@ class TestPutUser:
         with patch.object(
             router_module.UserService,
             "update",
-            side_effect=UserUpdateError(db_user.id),
+            side_effect=UserUpdateError(),
         ):
             response = client.put(
                 f"{_USERS_URL}{db_user.id}",

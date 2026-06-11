@@ -34,20 +34,8 @@ class UserListResult(NamedTuple):
 def _require_user(session: Session, user_id: UUID) -> User:
     db_user = session.get(User, user_id)
     if db_user is None:
-        raise UserNotFoundError(user_id)
+        raise UserNotFoundError()
     return db_user
-
-
-def _validate_password(
-    user_id: UUID,
-    password_hash: str,
-    password: str,
-) -> None:
-    if not verify_password(
-        password_hash,
-        password,
-    ):
-        raise UserUnauthorizedError(user_id)
 
 
 def _apply_update(user: User, params: UserUpdate) -> User:
@@ -58,7 +46,7 @@ def _apply_update(user: User, params: UserUpdate) -> User:
         VerificationError,
         InvalidHashError,
     ) as exc:
-        raise UserUpdateError(user.id) from exc
+        raise UserUpdateError() from exc
     return user
 
 
@@ -111,9 +99,10 @@ class UserService:
     @staticmethod
     def update(session: Session, user_id: UUID, user: UserUpdate) -> User:
         db_user = _require_user(session, user_id)
-        _validate_password(user_id, db_user.password_hash, user.old_password)
-        db_user = _apply_update(db_user, user)
+        if not verify_password(db_user.password_hash, user.old_password):
+            raise UserUnauthorizedError()
 
+        db_user = _apply_update(db_user, user)
         session.commit()
         session.refresh(db_user)
         return db_user
@@ -121,7 +110,8 @@ class UserService:
     @staticmethod
     def destroy(session: Session, user_id: UUID, user: UserDestroy) -> None:
         db_user = _require_user(session, user_id)
-        _validate_password(user_id, db_user.password_hash, user.password)
+        if not verify_password(db_user.password_hash, user.password):
+            raise UserUnauthorizedError()
 
         session.delete(db_user)
         session.commit()
