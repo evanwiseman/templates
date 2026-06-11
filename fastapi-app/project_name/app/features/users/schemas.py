@@ -4,6 +4,9 @@ from uuid import UUID
 # Third party
 from pydantic import BaseModel, ConfigDict
 
+# Local
+from .validators import ValidatedPassword
+
 
 class UserShow(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -14,12 +17,12 @@ class UserShow(BaseModel):
 
 class UserCreate(BaseModel):
     username: str
-    password: str
+    password: ValidatedPassword
 
 
 class UserUpdate(BaseModel):
     old_password: str
-    new_password: str
+    new_password: ValidatedPassword
 
 
 class UserDestroy(BaseModel):

@@ -40,7 +40,9 @@ def _require_user(session: Session, user_id: UUID) -> User:
 
 def _apply_update(user: User, params: UserUpdate) -> User:
     try:
-        user.password_hash = hash_password(params.new_password)
+        user.password_hash = hash_password(
+            params.new_password.get_secret_value(),
+        )
     except (
         VerifyMismatchError,
         VerificationError,
@@ -88,7 +90,7 @@ class UserService:
 
         db_user = User(
             username=user.username,
-            password_hash=hash_password(user.password),
+            password_hash=hash_password(user.password.get_secret_value()),
         )
 
         session.add(db_user)

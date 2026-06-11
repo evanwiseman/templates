@@ -26,6 +26,9 @@ from project_name.app.features.users import (
 )
 from project_name.app.features.users.errors import UserAlreadyExistsError
 
+# Local
+from .constants import VALID_NEW_PASSWORD, VALID_PASSWORD
+
 
 class TestGet:
     def test_returns_user(self, db_session: Session) -> None:
@@ -104,9 +107,9 @@ class TestCreate:
         """
         user_data = {
             "username": "alice",
-            "password": "secret-password",
+            "password": VALID_PASSWORD,
         }
-        user_in = UserCreate(**user_data)
+        user_in = UserCreate.model_validate(user_data)
         created = UserService.create(db_session, user_in)
 
         stored = db_session.scalars(
@@ -121,7 +124,9 @@ class TestCreate:
         Args:
             db_session (Session): Test session.
         """
-        user = UserCreate(username="alice", password="secret-password")
+        user = UserCreate.model_validate(
+            {"username": "alice", "password": VALID_PASSWORD},
+        )
         UserService.create(db_session, user)
 
         with pytest.raises(UserAlreadyExistsError):
@@ -136,7 +141,7 @@ class TestUpdate:
             db_session (Session): Test session.
         """
         old_password = "old-password"
-        new_password = "new-password"
+        new_password = VALID_NEW_PASSWORD
         user = User(
             id=uuid7(),
             username="alice",
@@ -146,9 +151,11 @@ class TestUpdate:
         db_session.add(user)
         db_session.commit()
 
-        user_in = UserUpdate(
-            old_password=old_password,
-            new_password=new_password,
+        user_in = UserUpdate.model_validate(
+            {
+                "old_password": old_password,
+                "new_password": new_password,
+            },
         )
 
         result = UserService.update(db_session, user.id, user_in)
@@ -170,9 +177,11 @@ class TestUpdate:
         )
         db_session.add(user)
         db_session.commit()
-        user_in = UserUpdate(
-            old_password="wrong-password",
-            new_password="new-password",
+        user_in = UserUpdate.model_validate(
+            {
+                "old_password": "wrong-password",
+                "new_password": VALID_NEW_PASSWORD,
+            },
         )
 
         with pytest.raises(UserUnauthorizedError):
@@ -192,9 +201,11 @@ class TestUpdate:
         )
         db_session.add(user)
         db_session.commit()
-        user_in = UserUpdate(
-            old_password=old_password,
-            new_password="new-password",
+        user_in = UserUpdate.model_validate(
+            {
+                "old_password": old_password,
+                "new_password": VALID_NEW_PASSWORD,
+            },
         )
 
         with (
@@ -214,9 +225,11 @@ class TestUpdate:
             db_session (Session): Test session.
         """
         missing_id = uuid7()
-        user_in = UserUpdate(
-            old_password="old-password",
-            new_password="secret-password",
+        user_in = UserUpdate.model_validate(
+            {
+                "old_password": "old-password",
+                "new_password": VALID_NEW_PASSWORD,
+            },
         )
 
         with pytest.raises(UserNotFoundError):

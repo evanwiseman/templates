@@ -17,6 +17,9 @@ import project_name.app.features.users.router as router_module
 from project_name.app.core.security import hash_password, verify_password
 from project_name.app.features.users import User, UserShow, UserUpdateError
 
+# Local
+from .constants import VALID_NEW_PASSWORD, VALID_PASSWORD
+
 _USERS_URL = "/users/"
 UserPage = TypeAdapter(LimitOffsetPage[UserShow])
 
@@ -106,7 +109,7 @@ class TestPostUser:
         """
         user_data = {
             "username": "alice",
-            "password": "secret-password",
+            "password": VALID_PASSWORD,
         }
         response = client.post(url=_USERS_URL, json=user_data)
         assert response.status_code == status.HTTP_201_CREATED
@@ -130,7 +133,7 @@ class TestPostUser:
         """
         user_data = {
             "username": "alice",
-            "password": "secret-password",
+            "password": VALID_PASSWORD,
         }
 
         response = client.post(url=_USERS_URL, json=user_data)
@@ -138,6 +141,18 @@ class TestPostUser:
 
         response = client.post(url=_USERS_URL, json=user_data)
         assert response.status_code == status.HTTP_409_CONFLICT
+
+    def test_returns_validation_error_for_weak_password(
+        self,
+        client: TestClient,
+    ) -> None:
+        """POST /users returns 422 when password fails validation."""
+        response = client.post(
+            url=_USERS_URL,
+            json={"username": "alice", "password": "weak"},
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 class TestPutUser:
@@ -153,7 +168,7 @@ class TestPutUser:
             db_session (Session): Test session.
         """
         old_password = "old-password"
-        new_password = "new-password"
+        new_password = VALID_NEW_PASSWORD
         db_user = User(
             id=uuid7(),
             username="alice",
@@ -192,7 +207,7 @@ class TestPutUser:
             f"{_USERS_URL}{missing_id}",
             json={
                 "old_password": "old-password",
-                "new_password": "new-password",
+                "new_password": VALID_NEW_PASSWORD,
             },
         )
 
@@ -221,11 +236,35 @@ class TestPutUser:
             f"{_USERS_URL}{db_user.id}",
             json={
                 "old_password": "wrong-password",
-                "new_password": "new-password",
+                "new_password": VALID_NEW_PASSWORD,
             },
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_returns_validation_error_for_weak_new_password(
+        self,
+        client: TestClient,
+        db_session: Session,
+    ) -> None:
+        """PUT /users/{user_id} returns 422 when new_password fails validation."""
+        db_user = User(
+            id=uuid7(),
+            username="alice",
+            password_hash=hash_password("old-password"),
+        )
+        db_session.add(db_user)
+        db_session.commit()
+
+        response = client.put(
+            f"{_USERS_URL}{db_user.id}",
+            json={
+                "old_password": "old-password",
+                "new_password": "weak",
+            },
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_returns_update_error(
         self,
@@ -255,7 +294,7 @@ class TestPutUser:
                 f"{_USERS_URL}{db_user.id}",
                 json={
                     "old_password": "secret-password",
-                    "new_password": "new-password",
+                    "new_password": VALID_NEW_PASSWORD,
                 },
             )
 
