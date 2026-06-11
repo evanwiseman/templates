@@ -17,6 +17,7 @@ from project_name.app.core.security import hash_password, verify_password
 
 # Local
 from .errors import (
+    UserAlreadyExistsError,
     UserNotFoundError,
     UserUnauthorizedError,
     UserUpdateError,
@@ -91,6 +92,12 @@ class UserService:
 
     @staticmethod
     def create(session: Session, user: UserCreate) -> User:
+        maybe_db_user = session.scalar(
+            select(User).where(User.username == user.username)
+        )
+        if maybe_db_user is not None:
+            raise UserAlreadyExistsError()
+
         db_user = User(
             username=user.username,
             password_hash=hash_password(user.password),

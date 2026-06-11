@@ -4,6 +4,11 @@
 from uuid import UUID
 
 
+class UserAlreadyExistsError(Exception):
+    def __init__(self) -> None:
+        super().__init__("User already exists")
+
+
 class UserNotFoundError(Exception):
     def __init__(self, user_id: UUID) -> None:
         self.user_id = user_id

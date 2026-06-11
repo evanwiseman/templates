@@ -1,11 +1,11 @@
 """Tests for user."""
 
 # Standard library
-import http
 from unittest.mock import patch
 from uuid import uuid7
 
 # Third party
+from fastapi import status
 from fastapi.testclient import TestClient
 from fastapi_pagination import LimitOffsetPage
 from pydantic import TypeAdapter
@@ -42,7 +42,7 @@ class TestGetUser:
         db_session.commit()
 
         response = client.get(f"{_USERS_URL}{db_user.id}")
-        assert response.status_code == http.HTTPStatus.OK
+        assert response.status_code == status.HTTP_200_OK
 
         user = UserShow.model_validate(response.json())
         assert user.id == db_user.id
@@ -58,7 +58,7 @@ class TestGetUser:
 
         response = client.get(f"{_USERS_URL}{missing_id}")
 
-        assert response.status_code == http.HTTPStatus.NOT_FOUND
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 class TestGetUsers:
@@ -82,7 +82,7 @@ class TestGetUsers:
         db_session.commit()
 
         response = client.get(_USERS_URL)
-        assert response.status_code == http.HTTPStatus.OK
+        assert response.status_code == status.HTTP_200_OK
 
         page = UserPage.validate_python(response.json())
         assert page.total == 1
@@ -109,7 +109,7 @@ class TestPostUser:
             "password": "secret-password",
         }
         response = client.post(url=_USERS_URL, json=user_data)
-        assert response.status_code == http.HTTPStatus.CREATED
+        assert response.status_code == status.HTTP_201_CREATED
 
         user = UserShow.model_validate(response.json())
         assert user.username == user_data["username"]
@@ -117,6 +117,27 @@ class TestPostUser:
             select(User).where(User.username == user_data["username"]),
         ).one()
         assert stored.id == user.id
+
+    def test_returns_already_exists(
+        self,
+        client: TestClient,
+    ) -> None:
+        """POST /users returns 409 when user already exists.
+
+        Args:
+            client (TestClient): Test client.
+            db_session (Session): Test session.
+        """
+        user_data = {
+            "username": "alice",
+            "password": "secret-password",
+        }
+
+        response = client.post(url=_USERS_URL, json=user_data)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        response = client.post(url=_USERS_URL, json=user_data)
+        assert response.status_code == status.HTTP_409_CONFLICT
 
 
 class TestPutUser:
@@ -148,7 +169,7 @@ class TestPutUser:
                 "new_password": new_password,
             },
         )
-        assert response.status_code == http.HTTPStatus.OK
+        assert response.status_code == status.HTTP_200_OK
 
         user = UserShow.model_validate(response.json())
         assert user.id == user.id
@@ -175,7 +196,7 @@ class TestPutUser:
             },
         )
 
-        assert response.status_code == http.HTTPStatus.NOT_FOUND
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_returns_unauthorized(
         self,
@@ -204,7 +225,7 @@ class TestPutUser:
             },
         )
 
-        assert response.status_code == http.HTTPStatus.UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_returns_update_error(
         self,
@@ -238,7 +259,7 @@ class TestPutUser:
                 },
             )
 
-        assert response.status_code == http.HTTPStatus.INTERNAL_SERVER_ERROR
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
 class TestDeleteUser:
@@ -268,7 +289,7 @@ class TestDeleteUser:
             f"{_USERS_URL}{user_id}",
             json={"password": password},
         )
-        assert response.status_code == http.HTTPStatus.NO_CONTENT
+        assert response.status_code == status.HTTP_204_NO_CONTENT
         assert db_session.get(User, user_id) is None
 
     def test_returns_not_found(self, client: TestClient) -> None:
@@ -286,7 +307,7 @@ class TestDeleteUser:
             json={"password": "secret-password"},
         )
 
-        assert response.status_code == http.HTTPStatus.NOT_FOUND
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_returns_unauthorized(
         self,
@@ -314,4 +335,4 @@ class TestDeleteUser:
             json={"password": "wrong-password"},
         )
 
-        assert response.status_code == http.HTTPStatus.UNAUTHORIZED
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED

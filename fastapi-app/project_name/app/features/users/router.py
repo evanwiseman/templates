@@ -11,7 +11,12 @@ from fastapi_pagination import LimitOffsetPage
 from project_name.app.dependencies import PaginationParamsDep, SessionDep
 
 # Local
-from .errors import UserNotFoundError, UserUnauthorizedError, UserUpdateError
+from .errors import (
+    UserAlreadyExistsError,
+    UserNotFoundError,
+    UserUnauthorizedError,
+    UserUpdateError,
+)
 from .schemas import UserCreate, UserDestroy, UserShow, UserUpdate
 from .services import UserService
 
@@ -88,7 +93,13 @@ def post_user(user: UserCreate, session: SessionDep) -> UserShow:
     Returns:
         UserShow: User model to show.
     """
-    created = UserService.create(session, user)
+    try:
+        created = UserService.create(session, user)
+    except UserAlreadyExistsError as exc:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
     return UserShow.model_validate(created)
 
 

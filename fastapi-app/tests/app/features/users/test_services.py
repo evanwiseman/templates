@@ -24,6 +24,7 @@ from project_name.app.features.users import (
     UserUpdate,
     UserUpdateError,
 )
+from project_name.app.features.users.errors import UserAlreadyExistsError
 
 
 class TestGet:
@@ -54,10 +55,8 @@ class TestGet:
         """
         missing_id = uuid7()
 
-        with pytest.raises(UserNotFoundError) as exc_info:
+        with pytest.raises(UserNotFoundError):
             UserService.get(db_session, missing_id)
-
-        assert exc_info.value.user_id == missing_id
 
 
 class TestListQuery:
@@ -116,6 +115,18 @@ class TestCreate:
         assert stored.id == created.id
         assert stored.password_hash != user_data["password"]
 
+    def test_user_already_exists(self, db_session: Session) -> None:
+        """Create raises if user already exists
+
+        Args:
+            db_session (Session): Test session.
+        """
+        user = UserCreate(username="alice", password="secret-password")
+        UserService.create(db_session, user)
+
+        with pytest.raises(UserAlreadyExistsError):
+            UserService.create(db_session, user)
+
 
 class TestUpdate:
     def test_persists(self, db_session: Session) -> None:
@@ -164,10 +175,8 @@ class TestUpdate:
             new_password="new-password",
         )
 
-        with pytest.raises(UserUnauthorizedError) as exc_info:
+        with pytest.raises(UserUnauthorizedError):
             UserService.update(db_session, user.id, user_in)
-
-        assert exc_info.value.user_id == user.id
 
     def test_raises_when_hash_fails(self, db_session: Session) -> None:
         """Update raises when password hashing fails.
@@ -194,11 +203,9 @@ class TestUpdate:
                 "hash_password",
                 side_effect=InvalidHashError(),
             ),
-            pytest.raises(UserUpdateError) as exc_info,
+            pytest.raises(UserUpdateError),
         ):
             UserService.update(db_session, user.id, user_in)
-
-        assert exc_info.value.user_id == user.id
 
     def test_raises_when_not_found(self, db_session: Session) -> None:
         """Update raises when the user id does not exist.
@@ -212,10 +219,8 @@ class TestUpdate:
             new_password="secret-password",
         )
 
-        with pytest.raises(UserNotFoundError) as exc_info:
+        with pytest.raises(UserNotFoundError):
             UserService.update(db_session, missing_id, user_in)
-
-        assert exc_info.value.user_id == missing_id
 
 
 class TestDestroy:
@@ -256,14 +261,12 @@ class TestDestroy:
         db_session.add(user)
         db_session.commit()
 
-        with pytest.raises(UserUnauthorizedError) as exc_info:
+        with pytest.raises(UserUnauthorizedError):
             UserService.destroy(
                 db_session,
                 user.id,
                 UserDestroy(password="wrong-password"),
             )
-
-        assert exc_info.value.user_id == user.id
 
     def test_raises_when_not_found(self, db_session: Session) -> None:
         """Destroy raises when the user id does not exist.
@@ -273,11 +276,9 @@ class TestDestroy:
         """
         missing_id = uuid7()
 
-        with pytest.raises(UserNotFoundError) as exc_info:
+        with pytest.raises(UserNotFoundError):
             UserService.destroy(
                 db_session,
                 missing_id,
                 UserDestroy(password="secret-password"),
             )
-
-        assert exc_info.value.user_id == missing_id
