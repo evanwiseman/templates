@@ -1,5 +1,3 @@
-# Standard library
-
 # Third party
 from pydantic import Field, PostgresDsn, field_validator
 from pydantic_settings import SettingsConfigDict

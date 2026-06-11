@@ -12,9 +12,9 @@ from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine, pool
 
 # First party
-import app.features
-from app.core.config import settings
-from app.database.base import Base
+from project_name.app import features
+from project_name.app.core.config import settings
+from project_name.app.database.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,8 +29,8 @@ if config.config_file_name is not None:
 
 
 def _import_feature_models() -> None:
-    prefix = f"{app.features.__name__}."
-    for module in pkgutil.walk_packages(app.features.__path__, prefix):
+    prefix = f"{features.__name__}."
+    for module in pkgutil.walk_packages(features.__path__, prefix):
         if module.name.endswith(".models"):
             importlib.import_module(module.name)
 

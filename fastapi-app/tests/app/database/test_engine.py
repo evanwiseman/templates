@@ -1,8 +1,8 @@
 """Tests for engine."""
 
 # First party
-from app.core.config import Settings
-from app.database.engine import SessionLocal, engine
+from project_name.app.core.config import Settings
+from project_name.app.database.engine import SessionLocal, engine
 
 
 class TestEngine:

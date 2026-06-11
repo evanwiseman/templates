@@ -1,7 +1,7 @@
 """Tests for auth."""
 
 # First party
-from app.core.security import hash_password, verify_password
+from project_name.app.core.security import hash_password, verify_password
 
 
 class TestVerifyPassword:

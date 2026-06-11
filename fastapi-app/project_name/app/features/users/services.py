@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 
 # First party
-from app.core.security import hash_password, verify_password
+from project_name.app.core.security import hash_password, verify_password
 
 # Local
 from .errors import (

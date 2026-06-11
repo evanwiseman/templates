@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "app"
+name = "project_name"
 authors = [{ name = "Evan Wiseman" }]
 version = "0.1.0"
 description = "FastAPI Application bundled with Alembic and basic operations."
@@ -32,10 +32,10 @@ dev = [
 ]
 
 [project.scripts]
-main = "app.main:main"
+main = "project_name.app.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["app"]
+packages = ["project_name"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
@@ -46,7 +46,7 @@ members = ["packages/*"]
 [tool.ruff]
 target-version = "py314"
 line-length = 79
-src = ["app", "tests", "packages/example_lib"]
+src = ["project_name", "tests", "packages/example_lib"]
 exclude = [
     ".eggs",
     ".git",
@@ -113,7 +113,7 @@ max-nested-blocks = 3 # Maximum nested block depth (PLR1702)
 
 # Matches legacy [tool.isort]: profile=black, src_paths, sections, import_heading_*
 [tool.ruff.lint.isort]
-known-first-party = ["app"]
+known-first-party = ["project_name"]
 section-order = [
     "future",
     "standard-library",
@@ -147,7 +147,7 @@ line-ending = "auto"
 [tool.basedpyright]
 pythonVersion = "3.14"
 typeCheckingMode = "strict"
-include = ["app", "tests", "packages/example_lib"]
+include = ["project_name", "tests", "packages/example_lib"]
 extraPaths = [".", "packages/example_lib"]
 venvPath = "."
 venv = ".venv"
@@ -200,7 +200,7 @@ addopts = [
     "--strict-config",
     "-W error",                               # STRICT: Treat warnings as errors (catch deprecations early)
     "--tb=short",
-    "--cov=app",
+    "--cov=project_name",
     "--cov-report=term-missing:skip-covered",
     "--cov-report=html",
     "--cov-report=xml",
@@ -222,7 +222,7 @@ markers = [
 # COVERAGE CONFIGURATION
 # ============================================================
 [tool.coverage.run]
-source = ["app"]
+source = ["project_name"]
 branch = true # STRICT: Enable branch coverage
 omit = [
     "*/tests/*",
@@ -232,7 +232,7 @@ omit = [
     "*/.venv/*",
     "*/venv/*",
     "*/scripts/*",
-    "app/database/env.py",  # Alembic CLI entrypoint; exercised via migrations, not pytest
+    "project_name/app/database/env.py",  # Alembic CLI entrypoint; exercised via migrations, not pytest
 ]
 
 [tool.coverage.report]

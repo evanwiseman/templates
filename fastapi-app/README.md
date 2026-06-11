@@ -1,32 +1,28 @@
-# strict-python
+# fastaip-app
 
 Python 3.14 project template with strict typing using basedpyright, Ruff, pytest, and uv.
 
 Requires [uv](https://docs.astral.sh/uv/).
 
-```
-app/          # application package (rename after cloning)
+```bash
+project_name/          # rename after cloning
 packages/example_lib/   # optional uv workspace library (example)
 tests/
 ```
 
 ## Getting started
 
-Clone only this template from `main` on the [templates](https://github.com/evanwiseman/templates) monorepo:
+Clone templates, copy and paste fastapi-app.
 
 ```bash
-git clone --depth 1 --filter=blob:none --sparse https://github.com/evanwiseman/templates.git project-name
-cd project-name
-git sparse-checkout set strict-python
-mv strict-python/* strict-python/.??* .
-rmdir strict-python
+git clone https://github.com/evanwiseman/templates.git
 ```
 
-Rename the package and project metadata (`app/`, `pyproject.toml` `name`, imports in `tests/`). Then:
+Rename the package and project metadata (`project_name/`, `pyproject.toml` `name`, imports in `tests/`). Then:
 
 ```bash
 make install
-make run    # exits 0; logging is not configured (see note below)
+make run
 make check
 ```
 
@@ -38,44 +34,40 @@ cp .env.example .env
 
 ## Usage
 
-| Target | Description |
-|--------|-------------|
-| `make install` | Install project + dev tools |
-| `make run` | Run the application |
-| `make check` | Local quality pipeline (format may autofix, then lint, typecheck, test) |
-| `make ci` | Read-only quality gate (same checks as GitHub Actions CI) |
-| `make format` | Ruff format + fixes |
-| `make lint` | Ruff check |
-| `make typecheck` | basedpyright |
-| `make test` | pytest with coverage |
-| `make skylos` | Skylos (dead code, secrets, quality) |
-| `make prek` | Run pre-commit hooks |
-| `make lock` | Refresh `uv.lock` |
-| `make build` | Build wheels/sdists (app + workspace packages) |
-| `make build-app` | Build app only |
-| `make build-packages` | Build workspace packages only |
-| `make clean` | Remove caches, coverage, and build artifacts |
-| `make help` | List all targets |
+| Target                | Description                                                             |
+| --------------------- | ----------------------------------------------------------------------- |
+| `make install`        | Install project + dev tools                                             |
+| `make run`            | Run the application                                                     |
+| `make check`          | Local quality pipeline (format may autofix, then lint, typecheck, test) |
+| `make ci`             | Read-only quality gate (same checks as GitHub Actions CI)               |
+| `make format`         | Ruff format + fixes                                                     |
+| `make lint`           | Ruff check                                                              |
+| `make typecheck`      | basedpyright                                                            |
+| `make test`           | pytest with coverage                                                    |
+| `make skylos`         | Skylos (dead code, secrets, quality)                                    |
+| `make prek`           | Run pre-commit hooks                                                    |
+| `make lock`           | Refresh `uv.lock`                                                       |
+| `make build`          | Build wheels/sdists                                                     |
+| `make build-project`  | Build project only                                                      |
+| `make build-packages` | Build workspace packages only                                           |
+| `make clean`          | Remove caches, coverage, and build artifacts                            |
+| `make help`           | List all targets                                                        |
 
 ## Tooling
 
-| Concern | Tool |
-|---------|------|
-| Format + lint + security | Ruff (`S` rules) |
-| Types | basedpyright (`strict` + extra reports) |
-| Dead code / secrets | Skylos |
-| Tests + coverage | pytest |
+| Concern                  | Tool                                    |
+| ------------------------ | --------------------------------------- |
+| Format + lint + security | Ruff (`S` rules)                        |
+| Types                    | basedpyright (`strict` + extra reports) |
+| Dead code / secrets      | Skylos                                  |
+| Tests + coverage         | pytest                                  |
 
 ### Hooks vs CI
 
-| Command | When | What it runs |
-|---------|------|----------------|
-| `make prek` | Before each commit (fast) | Ruff format/check, basedpyright |
-| `make ci` | Before push / in GitHub Actions | Above + format `--check`, Skylos, pytest |
-
-### `make run` and logging
-
-The sample entrypoint uses the stdlib `logging` module but does not call `logging.basicConfig()`. Tests capture logs with pytest; a bare `make run` prints nothing at INFO. Configure logging in your entrypoint when you are ready.
+| Command     | When                            | What it runs                             |
+| ----------- | ------------------------------- | ---------------------------------------- |
+| `make prek` | Before each commit (fast)       | Ruff format/check, basedpyright          |
+| `make ci`   | Before push / in GitHub Actions | Above + format `--check`, Skylos, pytest |
 
 ## Workspace libraries
 

@@ -12,8 +12,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 # First party
-from app.core.security import hash_password, verify_password
-from app.features.users import (
+import project_name.app.features.users.services as services_module
+from project_name.app.core.security import hash_password, verify_password
+from project_name.app.features.users import (
     User,
     UserCreate,
     UserDestroy,
@@ -188,8 +189,9 @@ class TestUpdate:
         )
 
         with (
-            patch(
-                "app.features.users.services.hash_password",
+            patch.object(
+                services_module,
+                "hash_password",
                 side_effect=InvalidHashError(),
             ),
             pytest.raises(UserUpdateError) as exc_info,

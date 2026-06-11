@@ -1,5 +1,3 @@
-# Standard library
-
 # Third party
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict

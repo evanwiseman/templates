@@ -4,7 +4,7 @@
 from sqlalchemy.orm import DeclarativeBase
 
 # First party
-from app.database.base import Base
+from project_name.app.database.base import Base
 
 
 class TestBase:

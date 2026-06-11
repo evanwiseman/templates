@@ -13,8 +13,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 # First party
-from app.core.security import hash_password, verify_password
-from app.features.users import User, UserShow, UserUpdateError
+import project_name.app.features.users.router as router_module
+from project_name.app.core.security import hash_password, verify_password
+from project_name.app.features.users import User, UserShow, UserUpdateError
 
 _USERS_URL = "/users/"
 UserPage = TypeAdapter(LimitOffsetPage[UserShow])
@@ -224,8 +225,9 @@ class TestPutUser:
         db_session.add(db_user)
         db_session.commit()
 
-        with patch(
-            "app.features.users.router.UserService.update",
+        with patch.object(
+            router_module.UserService,
+            "update",
             side_effect=UserUpdateError(db_user.id),
         ):
             response = client.put(

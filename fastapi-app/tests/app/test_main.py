@@ -7,8 +7,9 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 # First party
-from app.core.config import Settings
-from app.main import app, main
+import project_name.app.main as main_module
+from project_name.app.core.config import Settings
+from project_name.app.main import app, main
 
 
 def test_root() -> None:
@@ -21,7 +22,7 @@ def test_root() -> None:
 
 def test_main(settings: Settings) -> None:
     """``main()`` starts uvicorn with the app and settings."""
-    with patch("app.main.uvicorn.run") as mock_run:
+    with patch.object(main_module.uvicorn, "run") as mock_run:
         main()
     mock_run.assert_called_once_with(
         app,

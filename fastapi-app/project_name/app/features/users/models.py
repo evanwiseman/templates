@@ -7,7 +7,7 @@ from sqlalchemy import Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # First party
-from app.database.base import Base
+from project_name.app.database.base import Base
 
 
 class User(Base):

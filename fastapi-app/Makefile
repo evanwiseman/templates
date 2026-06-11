@@ -1,16 +1,17 @@
 .PHONY: lock install run format lint typecheck skylos test pre-commit \
-	check ci clean build build-all build-app build-packages help
+	check ci clean build build-all build-project build-packages help
 
 # PEP 517 artifacts (wheels + sdists)
 DIST ?= dist
 # Paths checked by format, lint, typecheck, and Skylos
-CHECK = app tests packages/example_lib
+CHECK = project_name tests packages/example_lib
 
 lock:  ## Refresh uv.lock for the workspace (root + packages/* members)
 	uv lock
 
 install: lock  ## Install project + dev tools (linters, tests, etc.)
 	uv sync --extra dev
+	@test -f .env || cp .env.example .env
 
 run:  ## Run the application
 	uv run main
@@ -25,7 +26,7 @@ lint:  ## Ruff
 typecheck:  ## Type-check with basedpyright
 	uv run basedpyright $(CHECK)
 
-skylos:  ## Skylos (dead code, secrets, quality) on app + tests
+skylos:  ## Skylos (dead code, secrets, quality)
 	uv run skylos --no-upload $(CHECK)
 
 test:  ## Pytest (coverage and options from pyproject)
@@ -42,15 +43,15 @@ ci:  ## Read-only quality gate for CI (no autofix)
 	uv run ruff check $(CHECK)
 	$(MAKE) typecheck skylos test
 
-build: lock  ## Wheels + sdists for app and every workspace member
+build: lock  ## Wheels + sdists for every workspace member
 	rm -rf "$(DIST)"
 	mkdir -p "$(DIST)"
 	uv build --all-packages -o $(DIST)
 
-build-app: lock  ## Build only app (root project)
+build-project: lock  ## Build only project (root project)
 	rm -rf "$(DIST)"
 	mkdir -p "$(DIST)"
-	uv build --package app -o $(DIST)
+	uv build --package project_name -o $(DIST)
 
 build-packages: lock  ## Internal libs only
 	@if [ ! -d packages ]; then \

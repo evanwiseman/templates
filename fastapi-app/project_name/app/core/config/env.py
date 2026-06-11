@@ -1,5 +1,3 @@
-# Standard library
-
 # Third party
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

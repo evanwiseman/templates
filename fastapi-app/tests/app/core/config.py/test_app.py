@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 # First party
-from app.core.config import AppSettings, Settings
+from project_name.app.core.config import AppSettings, Settings
 
 
 class TestAppSettings:

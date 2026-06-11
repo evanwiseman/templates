@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from unittest.mock import patch
 
 # First party
-from app.database.session import get_session
+import project_name.app.database.session as session_module
+from project_name.app.database.session import get_session
 
 
 @dataclass
@@ -22,7 +23,9 @@ class TestGetSession:
     def test_yields_session_and_closes(self) -> None:
         """get_session yields a DB session and closes it when the generator ends."""
         fake_db = _ClosingSession()
-        with patch("app.database.session.SessionLocal", return_value=fake_db):
+        with patch.object(
+            session_module, "SessionLocal", return_value=fake_db
+        ):
             gen = get_session()
             assert next(gen) is fake_db
             gen.close()

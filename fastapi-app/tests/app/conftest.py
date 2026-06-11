@@ -21,11 +21,15 @@ os.environ["DB_URL"] = (
 )
 
 # First party
-from app.core.config import AppSettings, DatabaseSettings, Settings
-from app.core.config.settings import settings as config
-from app.database.base import Base
-from app.database.session import get_session
-from app.main import app
+from project_name.app.core.config import (
+    AppSettings,
+    DatabaseSettings,
+    Settings,
+)
+from project_name.app.core.config.settings import settings as config
+from project_name.app.database.base import Base
+from project_name.app.database.session import get_session
+from project_name.app.main import app
 
 _TEST_DATABASE_URL = "sqlite:///:memory:"
 
