@@ -19,11 +19,17 @@ os.environ["LOG_LEVEL"] = "INFO"
 os.environ["DB_URL"] = (
     "postgresql+psycopg://user:pass@localhost:5432/fastapi_app"
 )
+os.environ["JWT_SECRET"] = (
+    "25f5df2fe8a5a66c2fcf6fdf9be43795cc8d2b47f4aa160341a546f0e513c1ef"
+)
+os.environ["JWT_TTL"] = "15"
+os.environ["JWT_ISSUER"] = "tests"
 
 # First party
 from project_name.app.core.config import (
     AppSettings,
     DatabaseSettings,
+    JwtSettings,
     Settings,
 )
 from project_name.app.core.config.settings import settings as config
@@ -44,6 +50,11 @@ def app_settings() -> AppSettings:
 def database_settings() -> DatabaseSettings:
     """Database settings loaded for tests (via env, not ``.env``)."""
     return config.db
+
+@pytest.fixture
+def jwt_settings() -> JwtSettings:
+    """Jwt settings loaded for tests (via env, not ``.env``)."""
+    return config.jwt
 
 
 @pytest.fixture

@@ -22,7 +22,7 @@
 
 ### Not done (this plan)
 
-- JWT configuration (`JWT_SECRET`, TTLs, issuer)
+- ~~JWT configuration (`JWT_SECRET`, TTLs, issuer)~~
 - Refresh token generation + hashing helpers
 - Alembic migration for `refresh_tokens`
 - `features/auth/` service, schemas, router, errors

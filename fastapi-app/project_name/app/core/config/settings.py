@@ -5,10 +5,17 @@ import logging
 from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
+# First party
+from project_name.app.core.config.jwt import JwtSettings
+
 # Local
 from .app import AppSettings
 from .database import DatabaseSettings
 from .env import EnvSettings
+
+
+def jwt_settings_factory() -> JwtSettings:
+    return JwtSettings.model_validate({})
 
 
 class Settings(EnvSettings):
@@ -16,6 +23,7 @@ class Settings(EnvSettings):
 
     app: AppSettings = Field(default_factory=AppSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
+    jwt: JwtSettings = Field(default_factory=jwt_settings_factory)
 
     model_config = SettingsConfigDict(
         extra="ignore",
