@@ -1,12 +1,13 @@
 # Standard library
 from datetime import datetime
+from uuid import UUID
 
 # Third party
 from sqlalchemy import Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 # First party
-from project_name.app.core.uuid import UUID, uuid7
+from project_name.app.core.uuid import uuid7
 from project_name.app.database.base import Base
 
 

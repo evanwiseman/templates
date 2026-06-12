@@ -18,4 +18,4 @@ def uuid7() -> UUID:
     return uuid7_fn()
 
 
-__all__ = ["UUID", "uuid7"]
+__all__ = ["uuid7"]
