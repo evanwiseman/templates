@@ -1,4 +1,4 @@
-# fastaip-app
+# fastapi-app
 
 Python 3.12+ project template with strict typing using basedpyright, Ruff, pytest, and uv. Uses stdlib `uuid.uuid7` on 3.14+ and `uuid-backport` on 3.12–3.13 (see `project_name/app/core/uuid.py`).
 
