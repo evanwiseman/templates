@@ -51,6 +51,7 @@ def database_settings() -> DatabaseSettings:
     """Database settings loaded for tests (via env, not ``.env``)."""
     return config.db
 
+
 @pytest.fixture
 def jwt_settings() -> JwtSettings:
     """Jwt settings loaded for tests (via env, not ``.env``)."""
