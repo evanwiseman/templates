@@ -1,4 +1,6 @@
 # Standard library
+import hashlib
+import secrets
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -40,3 +42,11 @@ def decode_access_token(
         issuer=issuer,
         options={"require": ["exp", "sub", "iat"]},
     )
+
+
+def make_refresh_token() -> str:
+    return secrets.token_urlsafe(32)
+
+
+def hash_refresh_token(raw: str) -> str:
+    return hashlib.sha256(raw.encode()).hexdigest()
