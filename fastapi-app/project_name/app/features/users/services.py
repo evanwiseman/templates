@@ -41,15 +41,13 @@ def _apply_update(user: User, params: UserUpdate) -> User:
         raise InternalError() from exc
     return user
 
+def _list_query() -> Select[tuple[User]]:
+    return select(User).order_by(User.created_at)
 
 class UserService:
     @staticmethod
     def get(session: Session, user_id: UUID) -> User:
         return _require_user(session, user_id)
-
-    @staticmethod
-    def list_query() -> Select[tuple[User]]:
-        return select(User).order_by(User.created_at)
 
     @staticmethod
     def list(
@@ -58,15 +56,15 @@ class UserService:
         limit: int,
         offset: int,
     ) -> ListResult[User]:
-        query = UserService.list_query()
+        stmt = _list_query()
         total = (
             session.scalar(
-                select(func.count()).select_from(query.subquery()),
+                select(func.count()).select_from(stmt.subquery()),
             )
             or 0
         )
         items = list(
-            session.scalars(query.limit(limit).offset(offset)).all(),
+            session.scalars(stmt.limit(limit).offset(offset)).all(),
         )
         return ListResult(items=items, total=total)
 
