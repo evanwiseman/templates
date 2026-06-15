@@ -8,15 +8,17 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 
 # First party
+from project_name.app.core.errors import (
+    InternalError,
+)
 from project_name.app.core.schemas import ListResult
 from project_name.app.core.security import hash_password, verify_password
 
 # Local
 from .errors import (
-    UserAlreadyExistsError,
+    InvalidCredentialsError,
+    UserConflictError,
     UserNotFoundError,
-    UserUnauthorizedError,
-    UserUpdateError,
 )
 from .models import User
 from .schemas import UserCreate, UserDestroy, UserUpdate
@@ -35,7 +37,7 @@ def _apply_update(user: User, params: UserUpdate) -> User:
             params.new_password.get_secret_value(),
         )
     except HashingError as exc:
-        raise UserUpdateError() from exc
+        raise InternalError() from exc
     return user
 
 
@@ -73,7 +75,7 @@ class UserService:
             select(User).where(User.username == user.username)
         )
         if maybe_db_user is not None:
-            raise UserAlreadyExistsError()
+            raise UserConflictError()
 
         db_user = User(
             username=user.username,
@@ -89,7 +91,7 @@ class UserService:
     def update(session: Session, user_id: UUID, user: UserUpdate) -> User:
         db_user = _require_user(session, user_id)
         if not verify_password(db_user.password_hash, user.old_password):
-            raise UserUnauthorizedError()
+            raise InvalidCredentialsError()
 
         db_user = _apply_update(db_user, user)
         session.commit()
@@ -100,7 +102,7 @@ class UserService:
     def destroy(session: Session, user_id: UUID, user: UserDestroy) -> None:
         db_user = _require_user(session, user_id)
         if not verify_password(db_user.password_hash, user.password):
-            raise UserUnauthorizedError()
+            raise InvalidCredentialsError()
 
         session.delete(db_user)
         session.commit()

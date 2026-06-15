@@ -3,21 +3,21 @@
 # Standard library
 
 
-class UserAlreadyExistsError(Exception):
-    def __init__(self) -> None:
-        super().__init__("User already exists")
+# First party
+from project_name.app.core.errors import (
+    ConflictError,
+    NotFoundError,
+    UnauthorizedError,
+)
 
 
-class UserNotFoundError(Exception):
-    def __init__(self) -> None:
-        super().__init__("User not found")
+class UserConflictError(ConflictError):
+    detail = "User already exists"
 
 
-class UserUnauthorizedError(Exception):
-    def __init__(self) -> None:
-        super().__init__("Authentication failed")
+class UserNotFoundError(NotFoundError):
+    detail = "User not found"
 
 
-class UserUpdateError(Exception):
-    def __init__(self) -> None:
-        super().__init__("An unexpected error occured while updating the user")
+class InvalidCredentialsError(UnauthorizedError):
+    detail = "Invalid credentials"

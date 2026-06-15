@@ -13,9 +13,10 @@ from sqlalchemy.orm import Session
 
 # First party
 import project_name.app.features.users.router as router_module
+from project_name.app.core.errors import InternalError
 from project_name.app.core.security import hash_password, verify_password
 from project_name.app.core.uuid import uuid7
-from project_name.app.features.users import User, UserShow, UserUpdateError
+from project_name.app.features.users import User, UserShow
 
 # Local
 from .constants import VALID_NEW_PASSWORD, VALID_PASSWORD
@@ -288,7 +289,7 @@ class TestPutUser:
         with patch.object(
             router_module.UserService,
             "update",
-            side_effect=UserUpdateError(),
+            side_effect=InternalError(),
         ):
             response = client.put(
                 f"{_USERS_URL}{db_user.id}",

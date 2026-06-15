@@ -8,15 +8,10 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi_pagination import LimitOffsetPage
 
 # First party
+from project_name.app.core.errors import AppError
 from project_name.app.dependencies import PaginationParamsDep, SessionDep
 
 # Local
-from .errors import (
-    UserAlreadyExistsError,
-    UserNotFoundError,
-    UserUnauthorizedError,
-    UserUpdateError,
-)
 from .schemas import UserCreate, UserDestroy, UserShow, UserUpdate
 from .services import UserService
 
@@ -40,10 +35,10 @@ def get_user(user_id: UUID, session: SessionDep) -> UserShow:
     """
     try:
         user = UserService.get(session, user_id)
-    except UserNotFoundError as exc:
+    except AppError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
     return UserShow.model_validate(user)
 
@@ -66,11 +61,18 @@ def get_users(
     Returns:
         LimitOffsetPage[UserShow]: Paginated list of users with show.
     """
-    result = UserService.list(
-        session,
-        limit=params.limit,
-        offset=params.offset,
-    )
+    try:
+        result = UserService.list(
+            session,
+            limit=params.limit,
+            offset=params.offset,
+        )
+    except AppError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail=exc.detail,
+        ) from exc
+
     return LimitOffsetPage[UserShow].create(
         items=[UserShow.model_validate(user) for user in result.items],
         params=params,
@@ -95,10 +97,10 @@ def post_user(user: UserCreate, session: SessionDep) -> UserShow:
     """
     try:
         created = UserService.create(session, user)
-    except UserAlreadyExistsError as exc:
+    except AppError as exc:
         raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            detail=str(exc),
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
     return UserShow.model_validate(created)
 
@@ -125,20 +127,10 @@ def put_user(
     """
     try:
         updated = UserService.update(session, user_id, user)
-    except UserNotFoundError as exc:
+    except AppError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-    except UserUnauthorizedError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(exc),
-        ) from exc
-    except UserUpdateError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(exc),
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc
     return UserShow.model_validate(updated)
 
@@ -157,13 +149,8 @@ def delete_user(user_id: UUID, user: UserDestroy, session: SessionDep) -> None:
     """
     try:
         UserService.destroy(session, user_id, user)
-    except UserNotFoundError as exc:
+    except AppError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-    except UserUnauthorizedError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(exc),
+            status_code=exc.status_code,
+            detail=exc.detail,
         ) from exc

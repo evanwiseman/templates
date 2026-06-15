@@ -12,19 +12,19 @@ from sqlalchemy.orm import Session
 
 # First party
 import project_name.app.features.users.services as services_module
+from project_name.app.core.errors import InternalError
 from project_name.app.core.security import hash_password, verify_password
 from project_name.app.core.uuid import uuid7
 from project_name.app.features.users import (
+    InvalidCredentialsError,
     User,
     UserCreate,
     UserDestroy,
     UserNotFoundError,
     UserService,
-    UserUnauthorizedError,
     UserUpdate,
-    UserUpdateError,
 )
-from project_name.app.features.users.errors import UserAlreadyExistsError
+from project_name.app.features.users.errors import UserConflictError
 
 # Local
 from .constants import VALID_NEW_PASSWORD, VALID_PASSWORD
@@ -129,7 +129,7 @@ class TestCreate:
         )
         UserService.create(db_session, user)
 
-        with pytest.raises(UserAlreadyExistsError):
+        with pytest.raises(UserConflictError):
             UserService.create(db_session, user)
 
 
@@ -184,7 +184,7 @@ class TestUpdate:
             },
         )
 
-        with pytest.raises(UserUnauthorizedError):
+        with pytest.raises(InvalidCredentialsError):
             UserService.update(db_session, user.id, user_in)
 
     def test_raises_when_hash_fails(self, db_session: Session) -> None:
@@ -214,7 +214,7 @@ class TestUpdate:
                 "hash_password",
                 side_effect=HashingError(),
             ),
-            pytest.raises(UserUpdateError),
+            pytest.raises(InternalError),
         ):
             UserService.update(db_session, user.id, user_in)
 
@@ -274,7 +274,7 @@ class TestDestroy:
         db_session.add(user)
         db_session.commit()
 
-        with pytest.raises(UserUnauthorizedError):
+        with pytest.raises(InvalidCredentialsError):
             UserService.destroy(
                 db_session,
                 user.id,
