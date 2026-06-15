@@ -23,8 +23,8 @@
 ### Not done (this plan)
 
 - ~~JWT configuration (`JWT_SECRET`, TTLs, issuer)~~
-- Refresh token generation + hashing helpers
-- Alembic migration for `refresh_tokens`
+- ~~Refresh token generation + hashing helpers~~
+- ~~Alembic migration for `refresh_tokens`~~
 - `features/auth/` service, schemas, router, errors
 - `get_current_user` dependency
 - Login / refresh / logout HTTP endpoints
@@ -327,11 +327,11 @@ Use `expires` manipulation (negative TTL or backdated `expires_at` on DB row) â€
 - Create: `tests/app/core/config/test_jwt.py`
 - Modify: `tests/app/conftest.py`, `.env.example`
 
-- [ ] Write failing tests for `JWTSettings` (required secret, defaults, env override)
-- [ ] Implement `JWTSettings` with `env_prefix="JWT_"`
-- [ ] Nest on `Settings`; export from config `__init__`
-- [ ] Set test env vars in conftest; update `.env.example`
-- [ ] Run `uv run pytest tests/app/core/config/test_jwt.py -q`
+- [x] Write failing tests for `JWTSettings` (required secret, defaults, env override)
+- [x] Implement `JWTSettings` with `env_prefix="JWT_"`
+- [x] Nest on `Settings`; export from config `__init__`
+- [x] Set test env vars in conftest; update `.env.example`
+- [x] Run `uv run pytest tests/app/core/config/test_jwt.py -q`
 
 ---
 
@@ -343,11 +343,11 @@ Use `expires` manipulation (negative TTL or backdated `expires_at` on DB row) â€
 - Modify: `project_name/app/core/security/__init__.py`
 - Create: `tests/app/core/security/test_tokens.py`
 
-- [ ] Test `hash_refresh_token` is deterministic and differs per input
-- [ ] Test `make_refresh_token` returns url-safe strings of sufficient length
-- [ ] Implement helpers with `secrets` + `hashlib.sha256`
-- [ ] Export from `core/security/__init__.py`
-- [ ] Run security tests
+- [x] Test `hash_refresh_token` is deterministic and differs per input
+- [x] Test `make_refresh_token` returns url-safe strings of sufficient length
+- [x] Implement helpers with `secrets` + `hashlib.sha256`
+- [x] Export from `core/security/__init__.py`
+- [x] Run security tests
 
 ---
 
@@ -358,10 +358,10 @@ Use `expires` manipulation (negative TTL or backdated `expires_at` on DB row) â€
 - Modify: `project_name/app/features/auth/models.py`
 - Create: Alembic revision under `project_name/app/database/versions/`
 
-- [ ] Update model: `id` (uuid7 pk), `token_hash`, `revoked_at`, timestamps
-- [ ] Run `uv run alembic revision --autogenerate -m "add refresh tokens"`
-- [ ] Review migration (FK cascade, unique index on `token_hash`)
-- [ ] Apply locally: `uv run alembic upgrade head`
+- [x] Update model: `id` (uuid7 pk), `token_hash`, `revoked_at`, timestamps
+- [x] Run `uv run alembic revision --autogenerate -m "add refresh tokens"`
+- [x] Review migration (FK cascade, unique index on `token_hash`)
+- [x] Apply locally: `uv run alembic upgrade head`
 
 ---
 
