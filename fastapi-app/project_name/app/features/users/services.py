@@ -4,6 +4,7 @@ from uuid import UUID
 # Third party
 from argon2.exceptions import HashingError
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 
@@ -71,19 +72,18 @@ class UserService:
 
     @staticmethod
     def create(session: Session, user: UserCreate) -> User:
-        maybe_db_user = session.scalar(
-            select(User).where(User.username == user.username)
-        )
-        if maybe_db_user is not None:
-            raise UserConflictError()
-
         db_user = User(
             username=user.username,
             password_hash=hash_password(user.password.get_secret_value()),
         )
 
-        session.add(db_user)
-        session.commit()
+        try:
+            session.add(db_user)
+            session.commit()
+        except IntegrityError as exc:
+            session.rollback()
+            raise UserConflictError() from exc
+
         session.refresh(db_user)
         return db_user
 
