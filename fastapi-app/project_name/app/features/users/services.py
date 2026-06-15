@@ -1,5 +1,4 @@
 # Standard library
-from typing import NamedTuple
 from uuid import UUID
 
 # Third party
@@ -9,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 
 # First party
+from project_name.app.core.schemas import ListResult
 from project_name.app.core.security import hash_password, verify_password
 
 # Local
@@ -20,11 +20,6 @@ from .errors import (
 )
 from .models import User
 from .schemas import UserCreate, UserDestroy, UserUpdate
-
-
-class UserListResult(NamedTuple):
-    items: list[User]
-    total: int
 
 
 def _require_user(session: Session, user_id: UUID) -> User:
@@ -59,7 +54,7 @@ class UserService:
         *,
         limit: int,
         offset: int,
-    ) -> UserListResult:
+    ) -> ListResult[User]:
         query = UserService.list_query()
         total = (
             session.scalar(
@@ -70,7 +65,7 @@ class UserService:
         items = list(
             session.scalars(query.limit(limit).offset(offset)).all(),
         )
-        return UserListResult(items=items, total=total)
+        return ListResult(items=items, total=total)
 
     @staticmethod
     def create(session: Session, user: UserCreate) -> User:
